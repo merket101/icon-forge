@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Icon Forge — Unicode Symbol Icon Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-0: #08080a; --bg-1: #111114; --bg-2: #1a1a1f; --bg-3: #222228; --bg-4: #2c2c34;
+  --border-1: #2a2a32; --border-2: #3a3a44;
+  --text-1: #eaeaee; --text-2: #9a9aa4; --text-3: #5a5a66;
+  --accent: #e8751a; --accent-dim: rgba(232,117,26,0.15);
+  --font-d: 'Syne', sans-serif; --font-b: 'DM Sans', sans-serif;
+  --r-s: 6px; --r-m: 10px; --r-l: 16px;
+}
+
+html { background: var(--bg-0); color: var(--text-1); font-family: var(--font-b); font-size: 14px; }
+body { min-height: 100vh; padding: 24px 32px; max-width: 1200px; margin: 0 auto; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-4); border-radius: 3px; }
+
+/* Header */
+.header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 28px; }
+.header h1 { font-family: var(--font-d); font-weight: 800; font-size: 22px; letter-spacing: -0.5px; }
+.header .badge {
+  font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 1.5px;
+  background: var(--bg-2); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border-1);
+}
+
+/* Main Layout */
+.main { display: grid; grid-template-columns: 1fr 320px; gap: 28px; }
+
+/* Preview Panel */
+.preview-panel { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+.preview-wrap {
+  position: relative; width: 320px; height: 320px; border-radius: var(--r-l);
+  background: var(--bg-1); border: 1px solid var(--border-1);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.preview-wrap.transparent-bg {
+  background-image:
+    linear-gradient(45deg, #16161a 25%, transparent 25%), linear-gradient(-45deg, #16161a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #16161a 75%), linear-gradient(-45deg, transparent 75%, #16161a 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-color: #111114;
+}
+#preview { width: 300px; height: 300px; border-radius: var(--r-m); }
+
+.mini-previews { display: flex; align-items: flex-end; gap: 16px; }
+.mini-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mini-item canvas { border-radius: 4px; background: var(--bg-1); border: 1px solid var(--border-1); }
+.mini-item span { font-size: 10px; color: var(--text-3); font-weight: 500; }
+
+/* Controls Panel */
+.controls { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; max-height: 80vh; padding-right: 4px; }
+
+.section { background: var(--bg-1); border: 1px solid var(--border-1); border-radius: var(--r-m); padding: 16px; }
+.section-title {
+  font-family: var(--font-d); font-weight: 700; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text-3); margin-bottom: 12px;
+}
+
+.row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.row:last-child { margin-bottom: 0; }
+.row label { font-size: 12px; color: var(--text-2); min-width: 70px; flex-shrink: 0; }
+.row-value { font-size: 11px; color: var(--text-3); min-width: 28px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Symbol Input */
+.symbol-input {
+  width: 100%; font-size: 32px; text-align: center; padding: 12px; background: var(--bg-2);
+  border: 1px solid var(--border-1); border-radius: var(--r-s); color: var(--text-1);
+  outline: none; transition: border-color 0.2s;
+}
+.symbol-input:focus { border-color: var(--accent); }
+
+/* Presets row */
+.presets { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.preset-btn {
+  width: 36px; height: 36px; border-radius: var(--r-s); border: 2px solid var(--border-1);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; background: var(--bg-2); color: var(--text-1);
+  transition: all 0.15s ease; position: relative; overflow: hidden;
+}
+.preset-btn:hover { border-color: var(--border-2); transform: scale(1.08); }
+.preset-btn.active { border-color: var(--accent); }
+
+/* Color controls */
+input[type="color"] {
+  -webkit-appearance: none; appearance: none; width: 32px; height: 32px;
+  border: 2px solid var(--border-1); border-radius: var(--r-s); background: none;
+  cursor: pointer; padding: 2px; flex-shrink: 0;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
+
+.color-dots { display: flex; gap: 5px; flex-wrap: wrap; }
+.color-dot {
+  width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent;
+  transition: all 0.15s ease; flex-shrink: 0;
+}
+.color-dot:hover { transform: scale(1.15); }
+.color-dot.active { border-color: var(--text-1); box-shadow: 0 0 0 2px var(--bg-1); }
+
+/* Range inputs */
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px;
+  background: var(--bg-4); outline: none; cursor: pointer; flex: 1;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--text-1); border: 2px solid var(--bg-1); cursor: pointer; transition: transform 0.12s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+/* Select */
+select {
+  background: var(--bg-2); color: var(--text-1); border: 1px solid var(--border-1);
+  border-radius: var(--r-s); padding: 6px 10px; font-size: 12px; font-family: var(--font-b);
+  outline: none; cursor: pointer; flex: 1;
+}
+select:focus { border-color: var(--accent); }
+
+/* Toggle */
+.toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle input { display: none; }
+.toggle-track {
+  position: absolute; inset: 0; background: var(--bg-4); border-radius: 10px; cursor: pointer;
+  transition: background 0.2s;
+}
+.toggle input:checked + .toggle-track { background: var(--accent); }
+.toggle-track::after {
+  content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--text-1); top: 2px; left: 2px; transition: transform 0.2s;
+}
+.toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+
+/* Buttons */
+.btn {
+  padding: 10px 16px; border-radius: var(--r-s); font-family: var(--font-b); font-weight: 600;
+  font-size: 12px; cursor: pointer; transition: all 0.15s ease; border: none; text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.btn-secondary { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border-1); }
+.btn-secondary:hover { background: var(--bg-4); color: var(--text-1); }
+.export-row { display: flex; gap: 8px; margin-top: 4px; }
+.export-row select { flex: 0 0 110px; }
+
+/* Gallery */
+.gallery { margin-top: 24px; grid-column: 1 / -1; background: var(--bg-1); border: 1px solid var(--border-1); border-radius: var(--r-l); padding: 20px; }
+.gallery-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.gallery-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.gallery-tab {
+  padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 500; cursor: pointer;
+  background: transparent; color: var(--text-3); border: 1px solid transparent; transition: all 0.15s;
+  font-family: var(--font-b);
+}
+.gallery-tab:hover { color: var(--text-2); background: var(--bg-2); }
+.gallery-tab.active { color: var(--text-1); background: var(--bg-3); border-color: var(--border-1); }
+
+.gallery-search {
+  flex: 1; min-width: 160px; padding: 6px 12px 6px 30px; background: var(--bg-2);
+  border: 1px solid var(--border-1); border-radius: 20px; color: var(--text-1);
+  font-size: 12px; font-family: var(--font-b); outline: none; transition: border-color 0.2s;
+}
+.gallery-search:focus { border-color: var(--accent); }
+.gallery-search-wrap { position: relative; flex: 1; min-width: 160px; }
+.gallery-search-icon {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; color: var(--text-3); pointer-events: none;
+}
+.gallery-count { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 4px; max-height: 280px; overflow-y: auto; }
+.gallery-tile {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 18px;
+  border-radius: var(--r-s); background: var(--bg-2); border: 1px solid transparent; cursor: pointer;
+  transition: all 0.12s ease; user-select: none; position: relative;
+}
+.gallery-tile:hover { background: var(--bg-3); border-color: var(--border-2); transform: scale(1.08); }
+.gallery-tile.active { background: var(--accent-dim); border-color: var(--accent); }
+.gallery-tile[title]:hover::after {
+  content: attr(title); position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%); background: var(--bg-4); color: var(--text-1); font-size: 10px;
+  padding: 3px 8px; border-radius: 4px; white-space: nowrap; pointer-events: none; z-index: 10;
+  border: 1px solid var(--border-2);
+}
+.gallery-empty { grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-3); font-size: 13px; }
+
+/* Quick Presets */
+.quick-presets { display: flex; gap: 8px; flex-wrap: wrap; grid-column: 1 / -1; align-items: center; }
+.quick-preset {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: var(--r-m);
+  background: var(--bg-1); border: 1px solid var(--border-1); cursor: pointer; transition: all 0.15s;
+  position: relative;
+}
+.quick-preset:hover { border-color: var(--border-2); background: var(--bg-2); transform: translateY(-1px); }
+.quick-preset-icon {
+  width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center;
+  justify-content: center; font-size: 16px;
+}
+.quick-preset-name { font-size: 11px; color: var(--text-2); font-weight: 500; }
+
+/* Custom preset delete */
+.quick-preset .preset-delete {
+  display: none; position: absolute; top: -6px; right: -6px; width: 18px; height: 18px;
+  border-radius: 50%; background: #E84057; color: #fff; border: 2px solid var(--bg-0);
+  font-size: 10px; line-height: 14px; text-align: center; cursor: pointer; padding: 0;
+  font-family: var(--font-b); font-weight: 700;
+}
+.quick-preset:hover .preset-delete { display: block; }
+.quick-preset .preset-delete:hover { transform: scale(1.15); filter: brightness(1.2); }
+.quick-preset.custom { border-style: dashed; }
+
+/* Save preset button */
+.save-preset-btn {
+  width: 40px; height: 48px; border-radius: var(--r-m); background: var(--bg-1);
+  border: 1px dashed var(--border-2); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 20px; color: var(--text-3); transition: all 0.15s;
+  flex-shrink: 0;
+}
+.save-preset-btn:hover { background: var(--bg-2); color: var(--text-1); border-color: var(--accent); transform: translateY(-1px); }
+
+/* Save dialog */
+.dialog-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 200;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.dialog-overlay.open { opacity: 1; pointer-events: auto; }
+.dialog {
+  background: var(--bg-2); border: 1px solid var(--border-2); border-radius: var(--r-l);
+  padding: 24px; width: 340px; transform: translateY(12px); transition: transform 0.2s;
+}
+.dialog-overlay.open .dialog { transform: translateY(0); }
+.dialog h3 { font-family: var(--font-d); font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+.dialog p { font-size: 12px; color: var(--text-3); margin-bottom: 16px; }
+.dialog-preview { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 10px; background: var(--bg-1); border-radius: var(--r-s); }
+.dialog-preview canvas { border-radius: 6px; }
+.dialog-preview-label { font-size: 12px; color: var(--text-2); }
+.dialog input[type="text"] {
+  width: 100%; padding: 10px 12px; background: var(--bg-1); border: 1px solid var(--border-1);
+  border-radius: var(--r-s); color: var(--text-1); font-size: 14px; font-family: var(--font-b);
+  outline: none; margin-bottom: 16px;
+}
+.dialog input[type="text"]:focus { border-color: var(--accent); }
+.dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--bg-3); color: var(--text-1); padding: 10px 20px; border-radius: var(--r-m);
+  font-size: 13px; font-weight: 500; border: 1px solid var(--border-2);
+  opacity: 0; transition: all 0.3s ease; pointer-events: none; z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 768px) {
+  body { padding: 16px; }
+  .main { grid-template-columns: 1fr; }
+  .preview-wrap { width: 280px; height: 280px; }
+  #preview { width: 260px; height: 260px; }
+  .controls { max-height: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>Icon Forge</h1>
+  <span class="badge">Unicode Symbol Creator</span>
+</header>
+
+<!-- Quick Presets -->
+<div class="quick-presets" id="quickPresets"></div>
+
+<div class="main">
+  <!-- Preview -->
+  <div class="preview-panel">
+    <div class="preview-wrap" id="previewWrap">
+      <canvas id="preview" width="600" height="600"></canvas>
+    </div>
+    <div class="mini-previews" id="miniPreviews"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <!-- Symbol -->
+    <div class="section">
+      <div class="section-title">Symbol</div>
+      <input type="text" class="symbol-input" id="symbolInput" value="⚡" maxlength="4" spellcheck="false" autocomplete="off">
+    </div>
+
+    <!-- Colors -->
+    <div class="section">
+      <div class="section-title">Colors</div>
+      <div class="row">
+        <label>Symbol</label>
+        <input type="color" id="symbolColor" value="#E8751A">
+        <div class="color-dots" id="colorDots"></div>
+      </div>
+      <div class="row">
+        <label>Background</label>
+        <input type="color" id="bgColor" value="#0D0D0F">
+      </div>
+      <div class="row">
+        <label>Transparent</label>
+        <label class="toggle"><input type="checkbox" id="transparentBg"><span class="toggle-track"></span></label>
+      </div>
+    </div>
+
+    <!-- Border -->
+    <div class="section">
+      <div class="section-title">Border</div>
+      <div class="row">
+        <label>Enabled</label>
+        <label class="toggle"><input type="checkbox" id="borderEnabled" checked><span class="toggle-track"></span></label>
+      </div>
+      <div class="row">
+        <label>Auto Color</label>
+        <label class="toggle"><input type="checkbox" id="borderAutoColor" checked><span class="toggle-track"></span></label>
+      </div>
+      <div class="row" id="borderColorRow">
+        <label>Color</label>
+        <input type="color" id="borderColor" value="#E8751A">
+      </div>
+      <div class="row">
+        <label>Width</label>
+        <input type="range" id="borderWidth" min="0.5" max="6" step="0.5" value="2">
+        <span class="row-value" id="borderWidthVal">2</span>
+      </div>
+    </div>
+
+    <!-- Effects -->
+    <div class="section">
+      <div class="section-title">Effects</div>
+      <div class="row">
+        <label>Glow</label>
+        <input type="range" id="glowIntensity" min="0" max="100" step="1" value="25">
+        <span class="row-value" id="glowVal">25</span>
+      </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="section">
+      <div class="section-title">Layout</div>
+      <div class="row">
+        <label>Size</label>
+        <input type="range" id="symbolSize" min="15" max="90" step="1" value="55">
+        <span class="row-value" id="sizeVal">55</span>
+      </div>
+      <div class="row">
+        <label>Radius</label>
+        <input type="range" id="cornerRadius" min="0" max="50" step="1" value="22">
+        <span class="row-value" id="radiusVal">22</span>
+      </div>
+      <div class="row">
+        <label>Y Offset</label>
+        <input type="range" id="yOffset" min="-20" max="20" step="1" value="0">
+        <span class="row-value" id="yOffsetVal">0</span>
+      </div>
+      <div class="row">
+        <label>Font</label>
+        <select id="symbolFont">
+          <option value="system">System</option>
+          <option value="serif">Serif</option>
+          <option value="mono">Monospace</option>
+          <option value="symbols">Symbols</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Weight</label>
+        <select id="symbolWeight">
+          <option value="normal">Normal</option>
+          <option value="bold">Bold</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="section">
+      <div class="section-title">Export</div>
+      <div class="export-row">
+        <select id="exportSize">
+          <option value="32">32 × 32</option>
+          <option value="64">64 × 64</option>
+          <option value="128">128 × 128</option>
+          <option value="256">256 × 256</option>
+          <option value="512" selected>512 × 512</option>
+          <option value="1024">1024 × 1024</option>
+        </select>
+        <button class="btn btn-primary" id="exportBtn">Export PNG</button>
+      </div>
+      <div class="export-row" style="margin-top: 8px;">
+        <button class="btn btn-secondary" id="exportSvgBtn" style="flex:1;">Export SVG</button>
+      </div>
+      <div class="export-row" style="margin-top: 8px;">
+        <button class="btn btn-secondary" id="copyBtn" style="flex:1;">Copy to Clipboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gallery -->
+<div class="gallery">
+  <div class="gallery-header">
+    <div class="section-title" style="margin:0;">Symbol Gallery</div>
+    <div class="gallery-search-wrap">
+      <span class="gallery-search-icon">&#x1F50D;</span>
+      <input type="text" class="gallery-search" id="gallerySearch" placeholder="Search symbols by name..." spellcheck="false" autocomplete="off">
+    </div>
+    <span class="gallery-count" id="galleryCount"></span>
+  </div>
+  <div class="gallery-tabs" id="galleryTabs" style="margin-bottom:10px;"></div>
+  <div class="gallery-grid" id="galleryGrid"></div>
+</div>
+
+<!-- Save Preset Dialog -->
+<div class="dialog-overlay" id="saveDialog">
+  <div class="dialog">
+    <h3>Save Preset</h3>
+    <p>Save current icon configuration as a reusable preset.</p>
+    <div class="dialog-preview">
+      <canvas id="dialogPreview" width="64" height="64" style="width:32px;height:32px;"></canvas>
+      <span class="dialog-preview-label" id="dialogPreviewLabel"></span>
+    </div>
+    <input type="text" id="presetNameInput" placeholder="Preset name..." maxlength="20" spellcheck="false" autocomplete="off">
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" id="cancelPresetBtn">Cancel</button>
+      <button class="btn btn-primary" id="confirmPresetBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// === CONFIG ===
+// Comprehensive Unicode symbol library with searchable names
+const SYMBOL_LIB = [
+  // === Geometric Shapes ===
+  {c:'■',n:'black square',t:'Geometric'},{c:'□',n:'white square',t:'Geometric'},{c:'▪',n:'small black square',t:'Geometric'},
+  {c:'▫',n:'small white square',t:'Geometric'},{c:'▬',n:'black rectangle',t:'Geometric'},{c:'▭',n:'white rectangle',t:'Geometric'},
+  {c:'▮',n:'black vertical rectangle',t:'Geometric'},{c:'▯',n:'white vertical rectangle',t:'Geometric'},
+  {c:'●',n:'black circle',t:'Geometric'},{c:'○',n:'white circle',t:'Geometric'},{c:'◆',n:'black diamond',t:'Geometric'},
+  {c:'◇',n:'white diamond',t:'Geometric'},{c:'▲',n:'black up triangle',t:'Geometric'},{c:'△',n:'white up triangle',t:'Geometric'},
+  {c:'▼',n:'black down triangle',t:'Geometric'},{c:'▽',n:'white down triangle',t:'Geometric'},
+  {c:'◀',n:'black left triangle',t:'Geometric'},{c:'◁',n:'white left triangle',t:'Geometric'},
+  {c:'▶',n:'black right triangle',t:'Geometric'},{c:'▷',n:'white right triangle',t:'Geometric'},
+  {c:'⬡',n:'white hexagon',t:'Geometric'},{c:'⬢',n:'black hexagon',t:'Geometric'},
+  {c:'⬟',n:'black pentagon',t:'Geometric'},{c:'⬠',n:'white pentagon',t:'Geometric'},
+  {c:'⏣',n:'benzene ring hexagon',t:'Geometric'},{c:'⎔',n:'software function hexagon',t:'Geometric'},
+  {c:'◉',n:'fisheye circle',t:'Geometric'},{c:'◎',n:'bullseye target',t:'Geometric'},
+  {c:'◐',n:'circle left half black',t:'Geometric'},{c:'◑',n:'circle right half black',t:'Geometric'},
+  {c:'◒',n:'circle lower half black',t:'Geometric'},{c:'◓',n:'circle upper half black',t:'Geometric'},
+  {c:'◔',n:'circle upper right quarter',t:'Geometric'},{c:'◕',n:'circle all but upper left',t:'Geometric'},
+  {c:'▣',n:'white square containing black square',t:'Geometric'},{c:'▤',n:'square horizontal fill',t:'Geometric'},
+  {c:'▥',n:'square vertical fill',t:'Geometric'},{c:'▦',n:'square crosshatch fill',t:'Geometric'},
+  {c:'▧',n:'square upper left diagonal',t:'Geometric'},{c:'▨',n:'square upper right diagonal',t:'Geometric'},
+  {c:'▩',n:'square diagonal crosshatch',t:'Geometric'},
+  {c:'◧',n:'square left half black',t:'Geometric'},{c:'◨',n:'square right half black',t:'Geometric'},
+  {c:'◩',n:'square upper left diagonal half',t:'Geometric'},{c:'◪',n:'square lower right diagonal half',t:'Geometric'},
+  {c:'⊕',n:'circled plus',t:'Geometric'},{c:'⊖',n:'circled minus',t:'Geometric'},
+  {c:'⊗',n:'circled times cross',t:'Geometric'},{c:'⊘',n:'circled slash',t:'Geometric'},
+  {c:'⊙',n:'circled dot',t:'Geometric'},{c:'⊚',n:'circled ring',t:'Geometric'},{c:'⊛',n:'circled asterisk',t:'Geometric'},
+  {c:'⬤',n:'large black circle',t:'Geometric'},{c:'⭘',n:'large circle',t:'Geometric'},
+  {c:'◌',n:'dotted circle',t:'Geometric'},{c:'◍',n:'circle vertical half',t:'Geometric'},
+  {c:'◖',n:'left half black circle',t:'Geometric'},{c:'◗',n:'right half black circle',t:'Geometric'},
+  {c:'◠',n:'upper half circle',t:'Geometric'},{c:'◡',n:'lower half circle',t:'Geometric'},
+  {c:'◢',n:'black lower right triangle',t:'Geometric'},{c:'◣',n:'black lower left triangle',t:'Geometric'},
+  {c:'◤',n:'black upper left triangle',t:'Geometric'},{c:'◥',n:'black upper right triangle',t:'Geometric'},
+  {c:'◦',n:'white bullet',t:'Geometric'},{c:'◭',n:'triangle with left half black',t:'Geometric'},
+  {c:'◮',n:'triangle with right half black',t:'Geometric'},
+  {c:'◯',n:'large circle outline',t:'Geometric'},{c:'◰',n:'white square upper left',t:'Geometric'},
+  {c:'◱',n:'white square lower left',t:'Geometric'},{c:'◲',n:'white square lower right',t:'Geometric'},
+  {c:'◳',n:'white square upper right',t:'Geometric'},
+  {c:'◸',n:'upper left triangle',t:'Geometric'},{c:'◹',n:'upper right triangle',t:'Geometric'},
+  {c:'◺',n:'lower left triangle',t:'Geometric'},{c:'◻',n:'white medium square',t:'Geometric'},
+  {c:'◼',n:'black medium square',t:'Geometric'},{c:'◽',n:'white medium small square',t:'Geometric'},
+  {c:'◾',n:'black medium small square',t:'Geometric'},
+  {c:'⬒',n:'square upper half black',t:'Geometric'},{c:'⬓',n:'square lower half black',t:'Geometric'},
+  {c:'⬔',n:'square diagonal upper left',t:'Geometric'},{c:'⬕',n:'square diagonal lower left',t:'Geometric'},
+  {c:'⬖',n:'diamond left half black',t:'Geometric'},{c:'⬗',n:'diamond right half black',t:'Geometric'},
+  {c:'⬘',n:'diamond upper half black',t:'Geometric'},{c:'⬙',n:'diamond lower half black',t:'Geometric'},
+  {c:'⬚',n:'dotted square',t:'Geometric'},{c:'⬛',n:'large black square',t:'Geometric'},
+  {c:'⬜',n:'large white square',t:'Geometric'},
+  {c:'⯀',n:'black square centred',t:'Geometric'},{c:'⯁',n:'black diamond centred',t:'Geometric'},
+  {c:'⯂',n:'turned black pentagon',t:'Geometric'},{c:'⯃',n:'horizontal black octagon',t:'Geometric'},
+
+  // === Arrows ===
+  {c:'→',n:'rightwards arrow',t:'Arrows'},{c:'←',n:'leftwards arrow',t:'Arrows'},
+  {c:'↑',n:'upwards arrow',t:'Arrows'},{c:'↓',n:'downwards arrow',t:'Arrows'},
+  {c:'↗',n:'north east arrow',t:'Arrows'},{c:'↘',n:'south east arrow',t:'Arrows'},
+  {c:'↙',n:'south west arrow',t:'Arrows'},{c:'↖',n:'north west arrow',t:'Arrows'},
+  {c:'↔',n:'left right arrow',t:'Arrows'},{c:'↕',n:'up down arrow',t:'Arrows'},
+  {c:'⇒',n:'rightwards double arrow',t:'Arrows'},{c:'⇐',n:'leftwards double arrow',t:'Arrows'},
+  {c:'⇑',n:'upwards double arrow',t:'Arrows'},{c:'⇓',n:'downwards double arrow',t:'Arrows'},
+  {c:'⇔',n:'left right double arrow',t:'Arrows'},{c:'⇕',n:'up down double arrow',t:'Arrows'},
+  {c:'⇗',n:'north east double arrow',t:'Arrows'},{c:'⇘',n:'south east double arrow',t:'Arrows'},
+  {c:'⇙',n:'south west double arrow',t:'Arrows'},{c:'⇖',n:'north west double arrow',t:'Arrows'},
+  {c:'➤',n:'black right arrowhead',t:'Arrows'},{c:'➜',n:'heavy round arrow right',t:'Arrows'},
+  {c:'➔',n:'heavy wide arrow right',t:'Arrows'},{c:'➙',n:'heavy right arrow',t:'Arrows'},
+  {c:'➝',n:'triangle arrow right',t:'Arrows'},{c:'➞',n:'dashed triangle arrow right',t:'Arrows'},
+  {c:'↻',n:'clockwise open circle arrow',t:'Arrows'},{c:'↺',n:'anticlockwise open circle arrow',t:'Arrows'},
+  {c:'⟲',n:'anticlockwise circle arrow',t:'Arrows'},{c:'⟳',n:'clockwise circle arrow',t:'Arrows'},
+  {c:'↩',n:'leftwards arrow hook',t:'Arrows'},{c:'↪',n:'rightwards arrow hook',t:'Arrows'},
+  {c:'⤴',n:'right arrow curving up',t:'Arrows'},{c:'⤵',n:'right arrow curving down',t:'Arrows'},
+  {c:'↰',n:'upwards arrow with tip left',t:'Arrows'},{c:'↱',n:'upwards arrow with tip right',t:'Arrows'},
+  {c:'↲',n:'downwards arrow with tip left',t:'Arrows'},{c:'↳',n:'downwards arrow with tip right',t:'Arrows'},
+  {c:'↴',n:'rightwards arrow corner down',t:'Arrows'},{c:'↵',n:'downwards arrow corner left',t:'Arrows'},
+  {c:'↶',n:'anticlockwise top semicircle arrow',t:'Arrows'},{c:'↷',n:'clockwise top semicircle arrow',t:'Arrows'},
+  {c:'⟵',n:'long leftwards arrow',t:'Arrows'},{c:'⟶',n:'long rightwards arrow',t:'Arrows'},
+  {c:'⟷',n:'long left right arrow',t:'Arrows'},{c:'⟸',n:'long leftwards double arrow',t:'Arrows'},
+  {c:'⟹',n:'long rightwards double arrow',t:'Arrows'},{c:'⟺',n:'long left right double arrow',t:'Arrows'},
+  {c:'⤶',n:'arrow falling then curving left',t:'Arrows'},{c:'⤷',n:'arrow falling then curving right',t:'Arrows'},
+  {c:'⥤',n:'rightwards harpoon barb up',t:'Arrows'},{c:'⥥',n:'downwards harpoon barb right',t:'Arrows'},
+  {c:'⬆',n:'upwards black arrow',t:'Arrows'},{c:'⬇',n:'downwards black arrow',t:'Arrows'},
+  {c:'⬅',n:'leftwards black arrow',t:'Arrows'},{c:'➡',n:'rightwards black arrow',t:'Arrows'},
+  {c:'⬈',n:'north east black arrow',t:'Arrows'},{c:'⬉',n:'north west black arrow',t:'Arrows'},
+  {c:'⬊',n:'south east black arrow',t:'Arrows'},{c:'⬋',n:'south west black arrow',t:'Arrows'},
+  {c:'⬌',n:'left right black arrow',t:'Arrows'},{c:'⬍',n:'up down black arrow',t:'Arrows'},
+
+  // === Tech & Computing ===
+  {c:'⌨',n:'keyboard',t:'Tech'},{c:'⌘',n:'command mac',t:'Tech'},{c:'⏎',n:'return enter',t:'Tech'},
+  {c:'⏏',n:'eject',t:'Tech'},{c:'⏻',n:'power',t:'Tech'},{c:'⏼',n:'power on',t:'Tech'},
+  {c:'⏽',n:'power standby',t:'Tech'},{c:'⎋',n:'escape',t:'Tech'},
+  {c:'⚙',n:'gear settings cog',t:'Tech'},{c:'⚡',n:'lightning bolt electric',t:'Tech'},
+  {c:'⌗',n:'hash number',t:'Tech'},{c:'⏱',n:'stopwatch timer',t:'Tech'},{c:'⏰',n:'alarm clock',t:'Tech'},
+  {c:'⌥',n:'option alt key',t:'Tech'},{c:'⇧',n:'shift key up',t:'Tech'},{c:'⌃',n:'control key',t:'Tech'},
+  {c:'⌫',n:'delete backspace',t:'Tech'},{c:'⌦',n:'forward delete',t:'Tech'},
+  {c:'⎈',n:'helm ship wheel',t:'Tech'},{c:'⌖',n:'position crosshair indicator',t:'Tech'},
+  {c:'⌬',n:'benzene ring',t:'Tech'},{c:'⏏',n:'eject button',t:'Tech'},
+  {c:'⏭',n:'next track skip',t:'Tech'},{c:'⏮',n:'previous track skip',t:'Tech'},
+  {c:'⏯',n:'play pause',t:'Tech'},{c:'⏸',n:'pause button',t:'Tech'},
+  {c:'⏹',n:'stop button square',t:'Tech'},{c:'⏺',n:'record button circle',t:'Tech'},
+  {c:'⏩',n:'fast forward',t:'Tech'},{c:'⏪',n:'rewind',t:'Tech'},
+  {c:'⌚',n:'watch time wrist',t:'Tech'},{c:'⏲',n:'timer clock',t:'Tech'},
+  {c:'⌀',n:'diameter',t:'Tech'},{c:'⌁',n:'electric arrow',t:'Tech'},
+  {c:'⌂',n:'house home',t:'Tech'},{c:'⌐',n:'reversed not sign',t:'Tech'},
+  {c:'⌑',n:'square lozenge',t:'Tech'},{c:'⌒',n:'arc',t:'Tech'},
+  {c:'⌓',n:'segment',t:'Tech'},{c:'⌔',n:'sector',t:'Tech'},
+  {c:'⌕',n:'telephone recorder',t:'Tech'},{c:'⌧',n:'x in rectangle clear',t:'Tech'},
+  {c:'⍟',n:'circled star',t:'Tech'},{c:'⎌',n:'undo',t:'Tech'},
+
+  // === Stars & Decorative ===
+  {c:'★',n:'black star',t:'Stars'},{c:'☆',n:'white star',t:'Stars'},
+  {c:'✦',n:'black four pointed star',t:'Stars'},{c:'✧',n:'white four pointed star',t:'Stars'},
+  {c:'✶',n:'six pointed black star',t:'Stars'},{c:'✷',n:'eight pointed rectilinear star',t:'Stars'},
+  {c:'✸',n:'heavy eight pointed star',t:'Stars'},{c:'✹',n:'twelve pointed black star',t:'Stars'},
+  {c:'❖',n:'black diamond minus white x',t:'Stars'},{c:'✿',n:'black florette flower',t:'Stars'},
+  {c:'❀',n:'white florette flower',t:'Stars'},{c:'❁',n:'eight petalled outlined flower',t:'Stars'},
+  {c:'✻',n:'teardrop spoked asterisk',t:'Stars'},{c:'✼',n:'open centre teardrop asterisk',t:'Stars'},
+  {c:'✽',n:'heavy teardrop spoked asterisk',t:'Stars'},
+  {c:'❋',n:'heavy eight teardrop asterisk',t:'Stars'},{c:'❊',n:'eight teardrop spoked propeller',t:'Stars'},
+  {c:'❉',n:'balloon spoked asterisk',t:'Stars'},{c:'❈',n:'heavy four balloon asterisk',t:'Stars'},
+  {c:'✱',n:'heavy asterisk',t:'Stars'},{c:'✲',n:'open centre asterisk',t:'Stars'},
+  {c:'✳',n:'eight spoked asterisk',t:'Stars'},{c:'✴',n:'eight pointed star',t:'Stars'},
+  {c:'✵',n:'eight pointed pinwheel star',t:'Stars'},{c:'⁂',n:'asterism three dots',t:'Stars'},
+  {c:'※',n:'reference mark',t:'Stars'},
+  {c:'❂',n:'circled open centre star',t:'Stars'},{c:'❃',n:'heavy teardrop rosette',t:'Stars'},
+  {c:'❄',n:'snowflake',t:'Stars'},{c:'❅',n:'tight trifoliate snowflake',t:'Stars'},
+  {c:'❆',n:'heavy chevron snowflake',t:'Stars'},
+  {c:'❇',n:'sparkle',t:'Stars'},{c:'✡',n:'star of david hexagram',t:'Stars'},
+  {c:'✢',n:'four teardrop spoked asterisk',t:'Stars'},{c:'✣',n:'four balloon spoked asterisk',t:'Stars'},
+  {c:'✤',n:'heavy four balloon spoked asterisk',t:'Stars'},{c:'✥',n:'four club spoked asterisk',t:'Stars'},
+  {c:'✪',n:'circled white star',t:'Stars'},{c:'✫',n:'open centre black star',t:'Stars'},
+  {c:'✬',n:'black centre white star',t:'Stars'},{c:'✭',n:'outlined black star',t:'Stars'},
+  {c:'✮',n:'heavy outlined black star',t:'Stars'},{c:'✯',n:'pinwheel star',t:'Stars'},
+  {c:'✰',n:'shadowed white star',t:'Stars'},
+  {c:'⭐',n:'star medium',t:'Stars'},{c:'⭑',n:'black small star',t:'Stars'},{c:'⭒',n:'white small star',t:'Stars'},
+  {c:'🞰',n:'bold eight pointed star',t:'Stars'},{c:'🞱',n:'light eight pointed star',t:'Stars'},
+
+  // === Math & Logic ===
+  {c:'∞',n:'infinity',t:'Math'},{c:'∑',n:'summation sigma',t:'Math'},{c:'∏',n:'product pi',t:'Math'},
+  {c:'√',n:'square root radical',t:'Math'},{c:'∫',n:'integral calculus',t:'Math'},{c:'∮',n:'contour integral',t:'Math'},
+  {c:'≈',n:'approximately equal',t:'Math'},{c:'≠',n:'not equal',t:'Math'},
+  {c:'±',n:'plus minus',t:'Math'},{c:'×',n:'multiplication times cross',t:'Math'},
+  {c:'÷',n:'division divide',t:'Math'},
+  {c:'∂',n:'partial differential',t:'Math'},{c:'∇',n:'nabla gradient del',t:'Math'},{c:'∆',n:'increment delta triangle',t:'Math'},
+  {c:'π',n:'pi circle ratio',t:'Math'},{c:'Ω',n:'omega ohm resistance',t:'Math'},
+  {c:'λ',n:'lambda function',t:'Math'},{c:'δ',n:'delta change',t:'Math'},
+  {c:'θ',n:'theta angle',t:'Math'},{c:'φ',n:'phi golden ratio',t:'Math'},
+  {c:'ψ',n:'psi wave function',t:'Math'},{c:'σ',n:'sigma standard deviation',t:'Math'},
+  {c:'μ',n:'mu micro mean',t:'Math'},{c:'α',n:'alpha',t:'Math'},{c:'β',n:'beta',t:'Math'},
+  {c:'γ',n:'gamma',t:'Math'},{c:'ε',n:'epsilon',t:'Math'},{c:'ζ',n:'zeta',t:'Math'},
+  {c:'η',n:'eta',t:'Math'},{c:'ι',n:'iota',t:'Math'},{c:'κ',n:'kappa',t:'Math'},
+  {c:'ν',n:'nu',t:'Math'},{c:'ξ',n:'xi',t:'Math'},{c:'ρ',n:'rho',t:'Math'},
+  {c:'τ',n:'tau',t:'Math'},{c:'υ',n:'upsilon',t:'Math'},{c:'χ',n:'chi',t:'Math'},
+  {c:'ω',n:'omega small',t:'Math'},
+  {c:'∀',n:'for all universal',t:'Math'},{c:'∃',n:'there exists',t:'Math'},
+  {c:'∈',n:'element of member',t:'Math'},{c:'∉',n:'not element of',t:'Math'},
+  {c:'⊂',n:'subset',t:'Math'},{c:'⊃',n:'superset',t:'Math'},
+  {c:'∪',n:'union cup',t:'Math'},{c:'∩',n:'intersection cap',t:'Math'},
+  {c:'≤',n:'less than or equal',t:'Math'},{c:'≥',n:'greater than or equal',t:'Math'},
+  {c:'≡',n:'identical congruent',t:'Math'},{c:'≢',n:'not identical',t:'Math'},
+  {c:'∧',n:'logical and wedge',t:'Math'},{c:'∨',n:'logical or vee',t:'Math'},
+  {c:'¬',n:'not negation',t:'Math'},{c:'∅',n:'empty set null',t:'Math'},
+  {c:'∝',n:'proportional to',t:'Math'},{c:'∠',n:'angle',t:'Math'},
+  {c:'⊥',n:'perpendicular up tack',t:'Math'},{c:'∥',n:'parallel',t:'Math'},
+  {c:'⊤',n:'down tack',t:'Math'},{c:'⊢',n:'right tack turnstile',t:'Math'},
+  {c:'⊣',n:'left tack',t:'Math'},{c:'⊦',n:'assertion',t:'Math'},
+  {c:'∴',n:'therefore dots',t:'Math'},{c:'∵',n:'because dots',t:'Math'},
+  {c:'ℵ',n:'alef aleph',t:'Math'},{c:'ℏ',n:'planck constant h-bar',t:'Math'},
+  {c:'ℓ',n:'script small l',t:'Math'},{c:'ℝ',n:'real numbers',t:'Math'},
+  {c:'ℤ',n:'integers set',t:'Math'},{c:'ℕ',n:'natural numbers',t:'Math'},
+  {c:'ℚ',n:'rational numbers',t:'Math'},{c:'ℂ',n:'complex numbers',t:'Math'},
+
+  // === Currency ===
+  {c:'$',n:'dollar sign',t:'Currency'},{c:'€',n:'euro sign',t:'Currency'},
+  {c:'£',n:'pound sterling',t:'Currency'},{c:'¥',n:'yen yuan',t:'Currency'},
+  {c:'₹',n:'indian rupee',t:'Currency'},{c:'₿',n:'bitcoin',t:'Currency'},
+  {c:'¢',n:'cent sign',t:'Currency'},{c:'₩',n:'won sign korean',t:'Currency'},
+  {c:'₽',n:'ruble rouble',t:'Currency'},{c:'₴',n:'hryvnia',t:'Currency'},
+  {c:'₺',n:'turkish lira',t:'Currency'},{c:'₫',n:'dong vietnamese',t:'Currency'},
+  {c:'₱',n:'peso sign',t:'Currency'},{c:'₮',n:'tugrik mongolian',t:'Currency'},
+  {c:'₳',n:'austral',t:'Currency'},{c:'₲',n:'guarani',t:'Currency'},
+  {c:'₵',n:'cedi ghanaian',t:'Currency'},{c:'₸',n:'tenge kazakh',t:'Currency'},
+  {c:'฿',n:'baht thai',t:'Currency'},{c:'₪',n:'sheqel israeli',t:'Currency'},
+
+  // === Music & Sound ===
+  {c:'♩',n:'quarter note',t:'Music'},{c:'♪',n:'eighth note',t:'Music'},
+  {c:'♫',n:'beamed eighth notes',t:'Music'},{c:'♬',n:'beamed sixteenth notes',t:'Music'},
+  {c:'♭',n:'flat sign',t:'Music'},{c:'♮',n:'natural sign',t:'Music'},
+  {c:'♯',n:'sharp sign',t:'Music'},{c:'𝄞',n:'treble clef',t:'Music'},
+  {c:'𝄡',n:'alto clef',t:'Music'},{c:'𝄢',n:'bass clef',t:'Music'},
+  {c:'𝅗𝅥',n:'half note',t:'Music'},{c:'𝅘𝅥',n:'quarter note stem',t:'Music'},
+  {c:'𝅘𝅥𝅮',n:'eighth note stem',t:'Music'},{c:'𝄪',n:'double sharp',t:'Music'},
+
+  // === Weather & Nature ===
+  {c:'☀',n:'sun sunshine',t:'Weather'},{c:'☁',n:'cloud',t:'Weather'},
+  {c:'☂',n:'umbrella rain',t:'Weather'},{c:'☃',n:'snowman winter',t:'Weather'},
+  {c:'☄',n:'comet meteor',t:'Weather'},{c:'☇',n:'lightning',t:'Weather'},
+  {c:'☈',n:'thunderstorm',t:'Weather'},{c:'☉',n:'sun symbol',t:'Weather'},
+  {c:'❅',n:'tight trifoliate snowflake',t:'Weather'},{c:'❆',n:'heavy chevron snowflake',t:'Weather'},
+  {c:'☽',n:'first quarter moon',t:'Weather'},{c:'☾',n:'last quarter moon',t:'Weather'},
+  {c:'☼',n:'sun with rays',t:'Weather'},{c:'⛅',n:'sun behind cloud',t:'Weather'},
+  {c:'⛆',n:'rain',t:'Weather'},{c:'⛈',n:'thunder cloud rain',t:'Weather'},
+  {c:'🌊',n:'wave water ocean',t:'Weather'},{c:'🌑',n:'new moon dark',t:'Weather'},
+  {c:'🌕',n:'full moon',t:'Weather'},{c:'🌙',n:'crescent moon',t:'Weather'},
+  {c:'🌡',n:'thermometer temperature',t:'Weather'},
+
+  // === Cards & Games ===
+  {c:'♠',n:'black spade suit',t:'Games'},{c:'♣',n:'black club suit',t:'Games'},
+  {c:'♥',n:'black heart suit love',t:'Games'},{c:'♦',n:'black diamond suit',t:'Games'},
+  {c:'♤',n:'white spade suit',t:'Games'},{c:'♧',n:'white club suit',t:'Games'},
+  {c:'♡',n:'white heart suit',t:'Games'},{c:'♢',n:'white diamond suit',t:'Games'},
+  {c:'⚀',n:'die face 1',t:'Games'},{c:'⚁',n:'die face 2',t:'Games'},
+  {c:'⚂',n:'die face 3',t:'Games'},{c:'⚃',n:'die face 4',t:'Games'},
+  {c:'⚄',n:'die face 5',t:'Games'},{c:'⚅',n:'die face 6',t:'Games'},
+  {c:'♔',n:'white chess king',t:'Games'},{c:'♕',n:'white chess queen',t:'Games'},
+  {c:'♖',n:'white chess rook castle',t:'Games'},{c:'♗',n:'white chess bishop',t:'Games'},
+  {c:'♘',n:'white chess knight horse',t:'Games'},{c:'♙',n:'white chess pawn',t:'Games'},
+  {c:'♚',n:'black chess king',t:'Games'},{c:'♛',n:'black chess queen',t:'Games'},
+  {c:'♜',n:'black chess rook castle',t:'Games'},{c:'♝',n:'black chess bishop',t:'Games'},
+  {c:'♞',n:'black chess knight horse',t:'Games'},{c:'♟',n:'black chess pawn',t:'Games'},
+  {c:'⛀',n:'white draughts man',t:'Games'},{c:'⛁',n:'white draughts king',t:'Games'},
+  {c:'⛂',n:'black draughts man',t:'Games'},{c:'⛃',n:'black draughts king',t:'Games'},
+
+  // === Symbols & Miscellaneous ===
+  {c:'☮',n:'peace sign',t:'Symbols'},{c:'☯',n:'yin yang',t:'Symbols'},
+  {c:'⚛',n:'atom nuclear',t:'Symbols'},{c:'☢',n:'radioactive',t:'Symbols'},
+  {c:'☣',n:'biohazard',t:'Symbols'},{c:'⚕',n:'caduceus medical',t:'Symbols'},
+  {c:'⚖',n:'scales balance justice',t:'Symbols'},{c:'⚗',n:'alembic chemistry flask',t:'Symbols'},
+  {c:'⚘',n:'flower floral',t:'Symbols'},{c:'⚙',n:'gear settings',t:'Symbols'},
+  {c:'⚚',n:'staff hermes',t:'Symbols'},{c:'⚜',n:'fleur de lis',t:'Symbols'},
+  {c:'⚝',n:'outlined white star',t:'Symbols'},{c:'⚞',n:'three lines left',t:'Symbols'},
+  {c:'⚟',n:'three lines right',t:'Symbols'},{c:'✈',n:'airplane travel',t:'Symbols'},
+  {c:'☎',n:'telephone phone call',t:'Symbols'},{c:'✉',n:'envelope email mail',t:'Symbols'},
+  {c:'⚐',n:'white flag',t:'Symbols'},{c:'⚑',n:'black flag',t:'Symbols'},
+  {c:'⚓',n:'anchor nautical',t:'Symbols'},{c:'⚔',n:'crossed swords battle',t:'Symbols'},
+  {c:'✂',n:'scissors cut',t:'Symbols'},{c:'✎',n:'pencil write',t:'Symbols'},
+  {c:'✏',n:'pencil sharp',t:'Symbols'},{c:'✐',n:'upper right pencil',t:'Symbols'},
+  {c:'✑',n:'white nib pen',t:'Symbols'},{c:'✒',n:'black nib pen',t:'Symbols'},
+  {c:'✓',n:'check mark tick',t:'Symbols'},{c:'✔',n:'heavy check mark',t:'Symbols'},
+  {c:'✕',n:'multiplication x',t:'Symbols'},{c:'✖',n:'heavy multiplication x',t:'Symbols'},
+  {c:'✗',n:'ballot x cross',t:'Symbols'},{c:'✘',n:'heavy ballot x',t:'Symbols'},
+  {c:'✙',n:'outlined greek cross',t:'Symbols'},{c:'✚',n:'heavy greek cross plus',t:'Symbols'},
+  {c:'✛',n:'open centre cross',t:'Symbols'},{c:'✜',n:'heavy open centre cross',t:'Symbols'},
+  {c:'✝',n:'latin cross',t:'Symbols'},{c:'✞',n:'shadowed latin cross',t:'Symbols'},
+  {c:'✟',n:'outlined latin cross',t:'Symbols'},
+  {c:'☠',n:'skull crossbones danger',t:'Symbols'},{c:'☡',n:'caution warning',t:'Symbols'},
+  {c:'☤',n:'caduceus medical snake',t:'Symbols'},{c:'☥',n:'ankh egyptian',t:'Symbols'},
+  {c:'☦',n:'orthodox cross',t:'Symbols'},{c:'☧',n:'chi rho',t:'Symbols'},
+  {c:'☩',n:'cross jerusalem',t:'Symbols'},{c:'☪',n:'star crescent',t:'Symbols'},
+  {c:'☬',n:'adi shakti khanda',t:'Symbols'},{c:'☭',n:'hammer sickle',t:'Symbols'},
+  {c:'☰',n:'trigram heaven',t:'Symbols'},{c:'☱',n:'trigram lake',t:'Symbols'},
+  {c:'☲',n:'trigram fire',t:'Symbols'},{c:'☳',n:'trigram thunder',t:'Symbols'},
+  {c:'☴',n:'trigram wind',t:'Symbols'},{c:'☵',n:'trigram water',t:'Symbols'},
+  {c:'☶',n:'trigram mountain',t:'Symbols'},{c:'☷',n:'trigram earth',t:'Symbols'},
+
+  // === Punctuation & Typography ===
+  {c:'§',n:'section sign',t:'Typography'},{c:'¶',n:'paragraph pilcrow',t:'Typography'},
+  {c:'†',n:'dagger',t:'Typography'},{c:'‡',n:'double dagger',t:'Typography'},
+  {c:'•',n:'bullet point',t:'Typography'},{c:'‣',n:'triangular bullet',t:'Typography'},
+  {c:'⁃',n:'hyphen bullet',t:'Typography'},{c:'…',n:'ellipsis dots',t:'Typography'},
+  {c:'‰',n:'per mille thousand',t:'Typography'},{c:'‱',n:'per ten thousand',t:'Typography'},
+  {c:'′',n:'prime feet minutes',t:'Typography'},{c:'″',n:'double prime inches',t:'Typography'},
+  {c:'‴',n:'triple prime',t:'Typography'},{c:'⁗',n:'quadruple prime',t:'Typography'},
+  {c:'©',n:'copyright',t:'Typography'},{c:'®',n:'registered trademark',t:'Typography'},
+  {c:'™',n:'trademark',t:'Typography'},{c:'℠',n:'service mark',t:'Typography'},
+  {c:'℃',n:'degree celsius',t:'Typography'},{c:'℉',n:'degree fahrenheit',t:'Typography'},
+  {c:'№',n:'numero sign number',t:'Typography'},{c:'℗',n:'sound recording copyright phonogram',t:'Typography'},
+  {c:'℮',n:'estimated sign',t:'Typography'},{c:'⅓',n:'fraction one third',t:'Typography'},
+  {c:'⅔',n:'fraction two thirds',t:'Typography'},{c:'¼',n:'fraction one quarter',t:'Typography'},
+  {c:'½',n:'fraction one half',t:'Typography'},{c:'¾',n:'fraction three quarters',t:'Typography'},
+
+  // === Box Drawing & Blocks ===
+  {c:'█',n:'full block solid',t:'Blocks'},{c:'▀',n:'upper half block',t:'Blocks'},
+  {c:'▄',n:'lower half block',t:'Blocks'},{c:'▌',n:'left half block',t:'Blocks'},
+  {c:'▐',n:'right half block',t:'Blocks'},
+  {c:'░',n:'light shade',t:'Blocks'},{c:'▒',n:'medium shade',t:'Blocks'},{c:'▓',n:'dark shade',t:'Blocks'},
+  {c:'▁',n:'lower one eighth block',t:'Blocks'},{c:'▂',n:'lower one quarter block',t:'Blocks'},
+  {c:'▃',n:'lower three eighths block',t:'Blocks'},{c:'▅',n:'lower five eighths block',t:'Blocks'},
+  {c:'▆',n:'lower three quarters block',t:'Blocks'},{c:'▇',n:'lower seven eighths block',t:'Blocks'},
+  {c:'▉',n:'left seven eighths block',t:'Blocks'},{c:'▊',n:'left three quarters block',t:'Blocks'},
+  {c:'▋',n:'left five eighths block',t:'Blocks'},{c:'▍',n:'left three eighths block',t:'Blocks'},
+  {c:'▎',n:'left one quarter block',t:'Blocks'},{c:'▏',n:'left one eighth block',t:'Blocks'},
+  {c:'┌',n:'box light down right',t:'Blocks'},{c:'┐',n:'box light down left',t:'Blocks'},
+  {c:'└',n:'box light up right',t:'Blocks'},{c:'┘',n:'box light up left',t:'Blocks'},
+  {c:'├',n:'box light vertical right',t:'Blocks'},{c:'┤',n:'box light vertical left',t:'Blocks'},
+  {c:'┬',n:'box light down horizontal',t:'Blocks'},{c:'┴',n:'box light up horizontal',t:'Blocks'},
+  {c:'┼',n:'box light vertical horizontal',t:'Blocks'},
+  {c:'╔',n:'box double down right',t:'Blocks'},{c:'╗',n:'box double down left',t:'Blocks'},
+  {c:'╚',n:'box double up right',t:'Blocks'},{c:'╝',n:'box double up left',t:'Blocks'},
+  {c:'═',n:'box double horizontal',t:'Blocks'},{c:'║',n:'box double vertical',t:'Blocks'},
+
+  // === Zodiac & Astrology ===
+  {c:'♈',n:'aries ram',t:'Zodiac'},{c:'♉',n:'taurus bull',t:'Zodiac'},
+  {c:'♊',n:'gemini twins',t:'Zodiac'},{c:'♋',n:'cancer crab',t:'Zodiac'},
+  {c:'♌',n:'leo lion',t:'Zodiac'},{c:'♍',n:'virgo maiden',t:'Zodiac'},
+  {c:'♎',n:'libra scales',t:'Zodiac'},{c:'♏',n:'scorpio scorpion',t:'Zodiac'},
+  {c:'♐',n:'sagittarius archer',t:'Zodiac'},{c:'♑',n:'capricorn goat',t:'Zodiac'},
+  {c:'♒',n:'aquarius water bearer',t:'Zodiac'},{c:'♓',n:'pisces fish',t:'Zodiac'},
+  {c:'☊',n:'ascending node',t:'Zodiac'},{c:'☋',n:'descending node',t:'Zodiac'},
+  {c:'☌',n:'conjunction',t:'Zodiac'},{c:'☍',n:'opposition',t:'Zodiac'},
+
+  // === Dingbats & Ornaments ===
+  {c:'❤',n:'heavy red heart love',t:'Dingbats'},{c:'❥',n:'rotated heart bullet',t:'Dingbats'},
+  {c:'❦',n:'floral heart',t:'Dingbats'},{c:'❧',n:'rotated floral heart',t:'Dingbats'},
+  {c:'❶',n:'circled number one',t:'Dingbats'},{c:'❷',n:'circled number two',t:'Dingbats'},
+  {c:'❸',n:'circled number three',t:'Dingbats'},{c:'❹',n:'circled number four',t:'Dingbats'},
+  {c:'❺',n:'circled number five',t:'Dingbats'},{c:'❻',n:'circled number six',t:'Dingbats'},
+  {c:'❼',n:'circled number seven',t:'Dingbats'},{c:'❽',n:'circled number eight',t:'Dingbats'},
+  {c:'❾',n:'circled number nine',t:'Dingbats'},{c:'❿',n:'circled number ten',t:'Dingbats'},
+  {c:'➊',n:'inverse circled one',t:'Dingbats'},{c:'➋',n:'inverse circled two',t:'Dingbats'},
+  {c:'➌',n:'inverse circled three',t:'Dingbats'},{c:'➍',n:'inverse circled four',t:'Dingbats'},
+  {c:'➎',n:'inverse circled five',t:'Dingbats'},{c:'➏',n:'inverse circled six',t:'Dingbats'},
+  {c:'➐',n:'inverse circled seven',t:'Dingbats'},{c:'➑',n:'inverse circled eight',t:'Dingbats'},
+  {c:'➒',n:'inverse circled nine',t:'Dingbats'},{c:'➓',n:'inverse circled ten',t:'Dingbats'},
+  {c:'☙',n:'reversed rotated floral heart',t:'Dingbats'},
+  {c:'❡',n:'curved stem paragraph',t:'Dingbats'},{c:'❢',n:'heavy exclamation ornament',t:'Dingbats'},
+  {c:'❣',n:'heavy heart exclamation',t:'Dingbats'},
+  {c:'❝',n:'heavy double comma quotation',t:'Dingbats'},{c:'❞',n:'heavy double turned comma',t:'Dingbats'},
+  {c:'❨',n:'medium left parenthesis ornament',t:'Dingbats'},{c:'❩',n:'medium right parenthesis ornament',t:'Dingbats'},
+  {c:'❪',n:'medium flattened left parenthesis',t:'Dingbats'},{c:'❫',n:'medium flattened right parenthesis',t:'Dingbats'},
+  {c:'❬',n:'medium left pointing angle',t:'Dingbats'},{c:'❭',n:'medium right pointing angle',t:'Dingbats'},
+  {c:'❮',n:'heavy left pointing angle',t:'Dingbats'},{c:'❯',n:'heavy right pointing angle',t:'Dingbats'},
+  {c:'❰',n:'heavy left pointing angle bracket',t:'Dingbats'},{c:'❱',n:'heavy right pointing angle bracket',t:'Dingbats'},
+
+  // === Enclosed & Circled Letters/Numbers ===
+  {c:'Ⓐ',n:'circled A',t:'Enclosed'},{c:'Ⓑ',n:'circled B',t:'Enclosed'},
+  {c:'Ⓒ',n:'circled C',t:'Enclosed'},{c:'Ⓓ',n:'circled D',t:'Enclosed'},
+  {c:'Ⓔ',n:'circled E',t:'Enclosed'},{c:'Ⓕ',n:'circled F',t:'Enclosed'},
+  {c:'Ⓖ',n:'circled G',t:'Enclosed'},{c:'Ⓗ',n:'circled H',t:'Enclosed'},
+  {c:'Ⓘ',n:'circled I',t:'Enclosed'},{c:'Ⓙ',n:'circled J',t:'Enclosed'},
+  {c:'Ⓚ',n:'circled K',t:'Enclosed'},{c:'Ⓛ',n:'circled L',t:'Enclosed'},
+  {c:'Ⓜ',n:'circled M',t:'Enclosed'},{c:'Ⓝ',n:'circled N',t:'Enclosed'},
+  {c:'Ⓞ',n:'circled O',t:'Enclosed'},{c:'Ⓟ',n:'circled P',t:'Enclosed'},
+  {c:'Ⓠ',n:'circled Q',t:'Enclosed'},{c:'Ⓡ',n:'circled R',t:'Enclosed'},
+  {c:'Ⓢ',n:'circled S',t:'Enclosed'},{c:'Ⓣ',n:'circled T',t:'Enclosed'},
+  {c:'Ⓤ',n:'circled U',t:'Enclosed'},{c:'Ⓥ',n:'circled V',t:'Enclosed'},
+  {c:'Ⓦ',n:'circled W',t:'Enclosed'},{c:'Ⓧ',n:'circled X',t:'Enclosed'},
+  {c:'Ⓨ',n:'circled Y',t:'Enclosed'},{c:'Ⓩ',n:'circled Z',t:'Enclosed'},
+  {c:'①',n:'circled digit one',t:'Enclosed'},{c:'②',n:'circled digit two',t:'Enclosed'},
+  {c:'③',n:'circled digit three',t:'Enclosed'},{c:'④',n:'circled digit four',t:'Enclosed'},
+  {c:'⑤',n:'circled digit five',t:'Enclosed'},{c:'⑥',n:'circled digit six',t:'Enclosed'},
+  {c:'⑦',n:'circled digit seven',t:'Enclosed'},{c:'⑧',n:'circled digit eight',t:'Enclosed'},
+  {c:'⑨',n:'circled digit nine',t:'Enclosed'},{c:'⑩',n:'circled digit ten',t:'Enclosed'},
+
+  // === Braille Patterns (selected) ===
+  {c:'⠿',n:'braille dots full',t:'Braille'},{c:'⠶',n:'braille dots pattern',t:'Braille'},
+  {c:'⠴',n:'braille pattern 2356',t:'Braille'},{c:'⠦',n:'braille pattern dots',t:'Braille'},
+  {c:'⠇',n:'braille pattern column',t:'Braille'},{c:'⠏',n:'braille dots 1234',t:'Braille'},
+  {c:'⠛',n:'braille dots 1245',t:'Braille'},{c:'⠽',n:'braille heavy pattern',t:'Braille'},
+  {c:'⣿',n:'braille all dots',t:'Braille'},{c:'⡿',n:'braille left full',t:'Braille'},
+  {c:'⢿',n:'braille right full',t:'Braille'},{c:'⣶',n:'braille middle full',t:'Braille'},
+  {c:'⣤',n:'braille bottom half',t:'Braille'},{c:'⠒',n:'braille horizontal middle',t:'Braille'},
+  {c:'⠉',n:'braille top dots',t:'Braille'},{c:'⠤',n:'braille bottom dots',t:'Braille'},
+];
+
+// Build category index
+const SYMBOL_CATEGORIES = {};
+SYMBOL_LIB.forEach(s => {
+  if (!SYMBOL_CATEGORIES[s.t]) SYMBOL_CATEGORIES[s.t] = [];
+  SYMBOL_CATEGORIES[s.t].push(s);
+});
+
+const COLORS = [
+  '#D4A843','#E8751A','#2BBB8A','#4A9EF5','#9B6DFF','#E84057','#F06292','#26C6DA','#9CCC65','#FFFFFF',
+];
+
+const PRESETS = [
+  { name: 'Gold',   symbol: '⌨', color: '#D4A843', bg: '#0D0D0F' },
+  { name: 'Ember',  symbol: '⚡', color: '#E8751A', bg: '#0D0D0F' },
+  { name: 'Teal',   symbol: '◉', color: '#2BBB8A', bg: '#0D0D0F' },
+  { name: 'Azure',  symbol: '◆', color: '#4A9EF5', bg: '#0D0D0F' },
+  { name: 'Violet', symbol: '★', color: '#9B6DFF', bg: '#0D0D0F' },
+  { name: 'Rose',   symbol: '♥', color: '#E84057', bg: '#0D0D0F' },
+];
+
+// === STATE ===
+const state = {
+  symbol: '⚡', symbolColor: '#E8751A', symbolSize: 55, symbolFont: 'system', symbolWeight: 'normal',
+  bgColor: '#0D0D0F', borderEnabled: true, borderColor: '#E8751A', borderAutoColor: true,
+  borderWidth: 2, cornerRadius: 22, glowIntensity: 25, yOffset: 0, transparentBg: false,
+};
+
+// === CUSTOM PRESETS ===
+const STORAGE_KEY = 'iconforge-custom-presets';
+function loadCustomPresets() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+}
+function saveCustomPresets(presets) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(presets));
+}
+let customPresets = loadCustomPresets();
+
+// === DOM ===
+const $ = id => document.getElementById(id);
+const preview = $('preview');
+const pCtx = preview.getContext('2d');
+const MINI_SIZES = [32, 48, 64, 96];
+
+// === RENDER ===
+function getFontFamily(f) {
+  switch(f) {
+    case 'serif': return 'Georgia, "Times New Roman", serif';
+    case 'mono': return '"SF Mono", "Fira Code", Consolas, monospace';
+    case 'symbols': return '"Apple Symbols", "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif';
+    default: return '-apple-system, "Segoe UI", system-ui, sans-serif';
+  }
+}
+
+function roundedRect(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r);
+  ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+function renderIcon(ctx, size, s) {
+  const r = (s.cornerRadius / 100) * size;
+  const bw = s.borderEnabled ? (s.borderWidth / 100) * size : 0;
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.save();
+
+  // Clip to shape
+  roundedRect(ctx, 0, 0, size, size, r);
+  ctx.clip();
+
+  // Background
+  if (!s.transparentBg) {
+    ctx.fillStyle = s.bgColor;
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  // Symbol
+  const fontFam = getFontFamily(s.symbolFont);
+  const weight = s.symbolWeight === 'bold' ? 'bold' : 'normal';
+  const maxDim = (s.symbolSize / 100) * size;
+  let fontSize = maxDim;
+  ctx.font = `${weight} ${fontSize}px ${fontFam}`;
+
+  // Auto-fit width
+  let m = ctx.measureText(s.symbol);
+  if (m.width > maxDim * 1.1) {
+    fontSize *= (maxDim * 1.1) / m.width;
+    ctx.font = `${weight} ${fontSize}px ${fontFam}`;
+    m = ctx.measureText(s.symbol);
+  }
+
+  const cx = size / 2;
+  const cy = size / 2 + (s.yOffset / 100) * size;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Glow layers
+  if (s.glowIntensity > 0) {
+    const glowR = (s.glowIntensity / 100) * size * 0.25;
+
+    ctx.save();
+    ctx.shadowColor = s.symbolColor;
+    ctx.shadowBlur = glowR * 2.5;
+    ctx.fillStyle = s.symbolColor;
+    ctx.globalAlpha = 0.3;
+    ctx.fillText(s.symbol, cx, cy);
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = s.symbolColor;
+    ctx.shadowBlur = glowR;
+    ctx.fillStyle = s.symbolColor;
+    ctx.globalAlpha = 0.6;
+    ctx.fillText(s.symbol, cx, cy);
+    ctx.restore();
+  }
+
+  // Sharp symbol
+  ctx.fillStyle = s.symbolColor;
+  if (s.glowIntensity > 0) {
+    ctx.shadowColor = s.symbolColor;
+    ctx.shadowBlur = (s.glowIntensity / 100) * size * 0.04;
+  }
+  ctx.fillText(s.symbol, cx, cy);
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // Border
+  if (s.borderEnabled && bw > 0) {
+    const half = bw / 2;
+    ctx.save();
+    roundedRect(ctx, half, half, size - bw, size - bw, Math.max(0, r - half));
+    ctx.strokeStyle = s.borderAutoColor ? s.symbolColor : s.borderColor;
+    ctx.lineWidth = bw;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function updatePreview() {
+  renderIcon(pCtx, 600, state);
+  // Mini previews
+  document.querySelectorAll('.mini-canvas').forEach(c => {
+    const sz = +c.dataset.size;
+    c.width = sz * 2;
+    c.height = sz * 2;
+    renderIcon(c.getContext('2d'), sz * 2, state);
+  });
+}
+
+// === UI SETUP ===
+function buildColorDots() {
+  const wrap = $('colorDots');
+  COLORS.forEach(c => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot' + (c === state.symbolColor ? ' active' : '');
+    dot.style.background = c;
+    dot.addEventListener('click', () => {
+      state.symbolColor = c;
+      $('symbolColor').value = c;
+      if (state.borderAutoColor) state.borderColor = c;
+      wrap.querySelectorAll('.color-dot').forEach(d => d.classList.toggle('active', d.style.background === c || d.style.backgroundColor === c));
+      updatePreview();
+    });
+    wrap.appendChild(dot);
+  });
+}
+
+function buildMiniPreviews() {
+  const wrap = $('miniPreviews');
+  MINI_SIZES.forEach(sz => {
+    const item = document.createElement('div');
+    item.className = 'mini-item';
+    const canvas = document.createElement('canvas');
+    canvas.className = 'mini-canvas';
+    canvas.dataset.size = sz;
+    canvas.width = sz * 2; canvas.height = sz * 2;
+    canvas.style.width = sz + 'px'; canvas.style.height = sz + 'px';
+    item.appendChild(canvas);
+    const label = document.createElement('span');
+    label.textContent = sz;
+    item.appendChild(label);
+    wrap.appendChild(item);
+  });
+}
+
+let activeCategory = 'All';
+
+function buildGallery() {
+  const tabs = $('galleryTabs');
+  const grid = $('galleryGrid');
+  const cats = Object.keys(SYMBOL_CATEGORIES);
+
+  tabs.innerHTML = '';
+
+  // "All" tab
+  const allTab = document.createElement('button');
+  allTab.className = 'gallery-tab active';
+  allTab.textContent = 'All';
+  allTab.addEventListener('click', () => { activeCategory = 'All'; refreshGallery(); setActiveTab('All'); });
+  tabs.appendChild(allTab);
+
+  cats.forEach(cat => {
+    const tab = document.createElement('button');
+    tab.className = 'gallery-tab';
+    tab.textContent = cat;
+    tab.addEventListener('click', () => { activeCategory = cat; refreshGallery(); setActiveTab(cat); });
+    tabs.appendChild(tab);
+  });
+
+  // Search
+  $('gallerySearch').addEventListener('input', () => refreshGallery());
+
+  refreshGallery();
+}
+
+function setActiveTab(name) {
+  $('galleryTabs').querySelectorAll('.gallery-tab').forEach(t => t.classList.toggle('active', t.textContent === name));
+}
+
+function refreshGallery() {
+  const grid = $('galleryGrid');
+  const query = ($('gallerySearch').value || '').toLowerCase().trim();
+  grid.innerHTML = '';
+
+  // Get symbols for active category
+  let syms = activeCategory === 'All' ? SYMBOL_LIB : (SYMBOL_CATEGORIES[activeCategory] || []);
+
+  // Filter by search
+  if (query) {
+    const terms = query.split(/\s+/);
+    syms = syms.filter(s => terms.every(t => s.n.includes(t) || s.c === t || s.t.toLowerCase().includes(t)));
+  }
+
+  $('galleryCount').textContent = `${syms.length} symbols`;
+
+  if (syms.length === 0) {
+    grid.innerHTML = '<div class="gallery-empty">No symbols found. Try a different search term.</div>';
+    return;
+  }
+
+  syms.forEach(s => {
+    const tile = document.createElement('div');
+    tile.className = 'gallery-tile' + (s.c === state.symbol ? ' active' : '');
+    tile.textContent = s.c;
+    tile.title = s.n;
+    tile.addEventListener('click', () => {
+      state.symbol = s.c;
+      $('symbolInput').value = s.c;
+      grid.querySelectorAll('.gallery-tile').forEach(t => t.classList.toggle('active', t.textContent === s.c));
+      updatePreview();
+    });
+    grid.appendChild(tile);
+  });
+}
+
+function applyStateToUI(s) {
+  $('symbolInput').value = s.symbol;
+  $('symbolColor').value = s.symbolColor;
+  $('bgColor').value = s.bgColor;
+  $('borderEnabled').checked = s.borderEnabled;
+  $('borderAutoColor').checked = s.borderAutoColor;
+  $('borderColor').value = s.borderColor;
+  $('borderWidth').value = s.borderWidth; $('borderWidthVal').textContent = s.borderWidth;
+  $('glowIntensity').value = s.glowIntensity; $('glowVal').textContent = s.glowIntensity;
+  $('symbolSize').value = s.symbolSize; $('sizeVal').textContent = s.symbolSize;
+  $('cornerRadius').value = s.cornerRadius; $('radiusVal').textContent = s.cornerRadius;
+  $('yOffset').value = s.yOffset; $('yOffsetVal').textContent = s.yOffset;
+  $('symbolFont').value = s.symbolFont;
+  $('symbolWeight').value = s.symbolWeight;
+  $('transparentBg').checked = s.transparentBg;
+  $('previewWrap').classList.toggle('transparent-bg', s.transparentBg);
+  $('borderColorRow').style.display = s.borderAutoColor ? 'none' : 'flex';
+  syncColorDots();
+}
+
+function buildQuickPresets() {
+  const wrap = $('quickPresets');
+  wrap.innerHTML = '';
+
+  // Built-in presets
+  PRESETS.forEach(p => {
+    const btn = document.createElement('div');
+    btn.className = 'quick-preset';
+    btn.innerHTML = `<div class="quick-preset-icon" style="background:${p.bg};color:${p.color};border:1px solid ${p.color}30;text-shadow:0 0 8px ${p.color}80;">${p.symbol}</div><span class="quick-preset-name">${p.name}</span>`;
+    btn.addEventListener('click', () => {
+      state.symbol = p.symbol; state.symbolColor = p.color; state.bgColor = p.bg;
+      if (state.borderAutoColor) state.borderColor = p.color;
+      $('symbolInput').value = p.symbol;
+      $('symbolColor').value = p.color;
+      $('bgColor').value = p.bg;
+      syncColorDots();
+      updatePreview();
+    });
+    wrap.appendChild(btn);
+  });
+
+  // Custom presets
+  customPresets.forEach((p, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'quick-preset custom';
+    const color = p.state.symbolColor;
+    const bg = p.state.bgColor;
+    btn.innerHTML = `<div class="quick-preset-icon" style="background:${bg};color:${color};border:1px solid ${color}30;text-shadow:0 0 8px ${color}80;">${p.state.symbol}</div><span class="quick-preset-name">${p.name}</span><button class="preset-delete" title="Delete preset">&times;</button>`;
+    btn.addEventListener('click', e => {
+      if (e.target.classList.contains('preset-delete')) return;
+      Object.assign(state, JSON.parse(JSON.stringify(p.state)));
+      applyStateToUI(state);
+      updatePreview();
+    });
+    btn.querySelector('.preset-delete').addEventListener('click', e => {
+      e.stopPropagation();
+      customPresets.splice(i, 1);
+      saveCustomPresets(customPresets);
+      buildQuickPresets();
+      showToast('Preset deleted');
+    });
+    wrap.appendChild(btn);
+  });
+
+  // Save button
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'save-preset-btn';
+  saveBtn.title = 'Save current as preset';
+  saveBtn.textContent = '+';
+  saveBtn.addEventListener('click', openSaveDialog);
+  wrap.appendChild(saveBtn);
+}
+
+function openSaveDialog() {
+  const overlay = $('saveDialog');
+  const input = $('presetNameInput');
+  overlay.classList.add('open');
+  input.value = '';
+  input.focus();
+  // Render mini preview in dialog
+  const c = $('dialogPreview');
+  renderIcon(c.getContext('2d'), 64, state);
+  $('dialogPreviewLabel').textContent = `${state.symbol}  —  ${state.symbolColor}`;
+}
+
+function closeSaveDialog() {
+  $('saveDialog').classList.remove('open');
+}
+
+function confirmSavePreset() {
+  const name = $('presetNameInput').value.trim();
+  if (!name) { $('presetNameInput').focus(); return; }
+  customPresets.push({ name, state: JSON.parse(JSON.stringify(state)) });
+  saveCustomPresets(customPresets);
+  buildQuickPresets();
+  closeSaveDialog();
+  showToast(`Preset "${name}" saved`);
+}
+
+function syncColorDots() {
+  $('colorDots').querySelectorAll('.color-dot').forEach(d => {
+    const bg = d.style.backgroundColor;
+    const hex = rgbToHex(bg);
+    d.classList.toggle('active', hex === state.symbolColor.toLowerCase());
+  });
+}
+
+function rgbToHex(rgb) {
+  if (rgb.startsWith('#')) return rgb.toLowerCase();
+  const m = rgb.match(/(\d+)/g);
+  if (!m) return '';
+  return '#' + m.slice(0,3).map(n => (+n).toString(16).padStart(2,'0')).join('');
+}
+
+// === EVENT HANDLERS ===
+function bindControls() {
+  // Symbol
+  $('symbolInput').addEventListener('input', e => { state.symbol = e.target.value || ' '; updatePreview(); });
+
+  // Colors
+  $('symbolColor').addEventListener('input', e => {
+    state.symbolColor = e.target.value;
+    if (state.borderAutoColor) state.borderColor = e.target.value;
+    syncColorDots();
+    updatePreview();
+  });
+  $('bgColor').addEventListener('input', e => { state.bgColor = e.target.value; updatePreview(); });
+  $('transparentBg').addEventListener('change', e => {
+    state.transparentBg = e.target.checked;
+    $('previewWrap').classList.toggle('transparent-bg', e.target.checked);
+    updatePreview();
+  });
+
+  // Border
+  $('borderEnabled').addEventListener('change', e => { state.borderEnabled = e.target.checked; updatePreview(); });
+  $('borderAutoColor').addEventListener('change', e => {
+    state.borderAutoColor = e.target.checked;
+    $('borderColorRow').style.display = e.target.checked ? 'none' : 'flex';
+    if (e.target.checked) state.borderColor = state.symbolColor;
+    updatePreview();
+  });
+  $('borderColor').addEventListener('input', e => { state.borderColor = e.target.value; updatePreview(); });
+  $('borderColorRow').style.display = 'none'; // auto-color on by default
+
+  // Sliders
+  const sliders = [
+    ['borderWidth', 'borderWidthVal', 'borderWidth'],
+    ['glowIntensity', 'glowVal', 'glowIntensity'],
+    ['symbolSize', 'sizeVal', 'symbolSize'],
+    ['cornerRadius', 'radiusVal', 'cornerRadius'],
+    ['yOffset', 'yOffsetVal', 'yOffset'],
+  ];
+  sliders.forEach(([inputId, valId, key]) => {
+    $(inputId).addEventListener('input', e => {
+      state[key] = +e.target.value;
+      $(valId).textContent = e.target.value;
+      updatePreview();
+    });
+  });
+
+  // Font / Weight
+  $('symbolFont').addEventListener('change', e => { state.symbolFont = e.target.value; updatePreview(); });
+  $('symbolWeight').addEventListener('change', e => { state.symbolWeight = e.target.value; updatePreview(); });
+
+  // Export
+  $('exportBtn').addEventListener('click', () => {
+    const size = +$('exportSize').value;
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    renderIcon(c.getContext('2d'), size, state);
+    c.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `icon-${size}x${size}.png`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showToast(`Exported ${size}×${size} PNG`);
+    }, 'image/png');
+  });
+
+  $('exportSvgBtn').addEventListener('click', () => {
+    const size = +$('exportSize').value;
+    const svg = generateSVG(size, state);
+    const blob = new Blob([svg], { type: 'image/svg+xml' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `icon-${size}x${size}.svg`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showToast(`Exported ${size}×${size} SVG`);
+  });
+
+  $('copyBtn').addEventListener('click', async () => {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    renderIcon(c.getContext('2d'), 512, state);
+    try {
+      const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      showToast('Copied to clipboard');
+    } catch(e) { showToast('Copy failed — try exporting instead'); }
+  });
+}
+
+function generateSVG(size, s) {
+  const r = (s.cornerRadius / 100) * size;
+  const bw = s.borderEnabled ? (s.borderWidth / 100) * size : 0;
+  const fontFam = getFontFamily(s.symbolFont);
+  const weight = s.symbolWeight === 'bold' ? 'bold' : 'normal';
+  const fontSize = (s.symbolSize / 100) * size;
+  const cx = size / 2;
+  const cy = size / 2 + (s.yOffset / 100) * size;
+  const borderColor = s.borderAutoColor ? s.symbolColor : s.borderColor;
+
+  // Escape symbol for XML
+  const esc = str => str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  let defs = '';
+  let glowFilter = '';
+
+  // Build glow filter
+  if (s.glowIntensity > 0) {
+    const glowR = (s.glowIntensity / 100) * size * 0.25;
+    defs = `<defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="${(glowR * 2.5 / 2).toFixed(1)}" result="blur1"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="${(glowR / 2).toFixed(1)}" result="blur2"/>
+      <feMerge>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>`;
+    glowFilter = ' filter="url(#glow)"';
+  }
+
+  // Build background
+  let bg = '';
+  if (!s.transparentBg) {
+    bg = `<rect width="${size}" height="${size}" rx="${r.toFixed(1)}" ry="${r.toFixed(1)}" fill="${s.bgColor}"/>`;
+  }
+
+  // Clip path for the rounded rect
+  const clipId = 'iconClip';
+  const clipDef = `<clipPath id="${clipId}"><rect width="${size}" height="${size}" rx="${r.toFixed(1)}" ry="${r.toFixed(1)}"/></clipPath>`;
+
+  // Border
+  let border = '';
+  if (s.borderEnabled && bw > 0) {
+    const half = bw / 2;
+    const br = Math.max(0, r - half);
+    border = `<rect x="${half.toFixed(1)}" y="${half.toFixed(1)}" width="${(size - bw).toFixed(1)}" height="${(size - bw).toFixed(1)}" rx="${br.toFixed(1)}" ry="${br.toFixed(1)}" fill="none" stroke="${borderColor}" stroke-width="${bw.toFixed(1)}"/>`;
+  }
+
+  // Symbol text
+  const textEl = `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-family="${esc(fontFam)}" font-size="${fontSize.toFixed(1)}" font-weight="${weight}" fill="${s.symbolColor}"${glowFilter}>${esc(s.symbol)}</text>`;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  ${defs}
+  <defs>${clipDef}</defs>
+  <g clip-path="url(#${clipId})">
+    ${bg}
+    ${textEl}
+  </g>
+  ${border}
+</svg>`;
+}
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// === INIT ===
+buildColorDots();
+buildMiniPreviews();
+buildGallery();
+buildQuickPresets();
+bindControls();
+updatePreview();
+
+// Save dialog events
+$('cancelPresetBtn').addEventListener('click', closeSaveDialog);
+$('confirmPresetBtn').addEventListener('click', confirmSavePreset);
+$('saveDialog').addEventListener('click', e => { if (e.target === $('saveDialog')) closeSaveDialog(); });
+$('presetNameInput').addEventListener('keydown', e => { if (e.key === 'Enter') confirmSavePreset(); if (e.key === 'Escape') closeSaveDialog(); });
+</script>
+</body>
+</html>
