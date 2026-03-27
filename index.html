@@ -50,6 +50,14 @@ body { min-height: 100vh; padding: 24px 32px; max-width: 1200px; margin: 0 auto;
 .toolbar-btn.randomize:hover { background: rgba(232,117,26,0.25); border-color: var(--accent); color: #fff; }
 .toolbar-sep { width: 1px; background: var(--border-1); margin: 4px 4px; }
 
+/* Snap buttons */
+.snap-btn {
+  padding: 4px 10px; border-radius: var(--r-s); border: 1px solid var(--border-1);
+  background: var(--bg-2); color: var(--text-2); cursor: pointer; font-size: 11px;
+  font-family: var(--font-b); transition: all 0.15s ease; white-space: nowrap;
+}
+.snap-btn:hover { background: var(--bg-3); color: var(--text-1); border-color: var(--border-2); }
+
 /* Main Layout */
 .main { display: grid; grid-template-columns: 1fr 320px; gap: 28px; }
 
@@ -605,44 +613,13 @@ select:focus { border-color: var(--accent); }
       <div class="section-title">Effects</div>
       <div class="row">
         <label>Glow</label>
-        <input type="range" id="glowIntensity" min="0" max="100" step="1" value="25">
+        <input type="range" id="glowIntensity" min="0" max="1000" step="1" value="25">
         <span class="row-value" id="glowVal">25</span>
       </div>
       <div class="row">
-        <label>Drop Shadow</label>
-        <label class="toggle"><input type="checkbox" id="dropShadowToggle"><span class="toggle-track"></span></label>
-      </div>
-      <div class="row" id="dropShadowColorRow" style="display:none;">
-        <label>Shadow Color</label>
-        <input type="color" id="dropShadowColor" value="#000000">
-      </div>
-      <div class="row" id="dropShadowBlurRow" style="display:none;">
-        <label>Blur</label>
-        <input type="range" id="dropShadowBlur" min="0" max="50" step="1" value="15">
-        <span class="row-value" id="dropShadowBlurVal">15</span>
-      </div>
-      <div class="row" id="dropShadowXRow" style="display:none;">
-        <label>X Offset</label>
-        <input type="range" id="dropShadowX" min="-30" max="30" step="1" value="5">
-        <span class="row-value" id="dropShadowXVal">5</span>
-      </div>
-      <div class="row" id="dropShadowYRow" style="display:none;">
-        <label>Y Offset</label>
-        <input type="range" id="dropShadowY" min="-30" max="30" step="1" value="5">
-        <span class="row-value" id="dropShadowYVal">5</span>
-      </div>
-      <div class="row">
-        <label>Inner Shadow</label>
-        <label class="toggle"><input type="checkbox" id="innerShadowToggle"><span class="toggle-track"></span></label>
-      </div>
-      <div class="row" id="innerShadowColorRow" style="display:none;">
-        <label>Shadow Color</label>
-        <input type="color" id="innerShadowColor" value="#000000">
-      </div>
-      <div class="row" id="innerShadowBlurRow" style="display:none;">
-        <label>Blur</label>
-        <input type="range" id="innerShadowBlur" min="0" max="50" step="1" value="10">
-        <span class="row-value" id="innerShadowBlurVal">10</span>
+        <label>Glow Radius</label>
+        <input type="range" id="glowRadius" min="1" max="200" step="1" value="25">
+        <span class="row-value" id="glowRadiusVal">25</span>
       </div>
     </div>
 
@@ -660,9 +637,27 @@ select:focus { border-color: var(--accent); }
         <span class="row-value" id="radiusVal">22</span>
       </div>
       <div class="row">
+        <label>X Offset</label>
+        <input type="range" id="xOffset" min="-30" max="30" step="1" value="0">
+        <span class="row-value" id="xOffsetVal">0</span>
+      </div>
+      <div class="row">
         <label>Y Offset</label>
-        <input type="range" id="yOffset" min="-20" max="20" step="1" value="0">
+        <input type="range" id="yOffset" min="-30" max="30" step="1" value="0">
         <span class="row-value" id="yOffsetVal">0</span>
+      </div>
+      <div class="row">
+        <label>Tilt</label>
+        <input type="range" id="tilt" min="-180" max="180" step="1" value="0">
+        <span class="row-value" id="tiltVal">0°</span>
+      </div>
+      <div class="row">
+        <label>Snap</label>
+        <div style="display:flex;gap:6px;">
+          <button class="snap-btn" id="snapCenter" title="Snap to center">⊕ Center</button>
+          <button class="snap-btn" id="snapHCenter" title="Snap horizontal center">↔ H</button>
+          <button class="snap-btn" id="snapVCenter" title="Snap vertical center">↕ V</button>
+        </div>
       </div>
       <div class="row">
         <label>Font</label>
@@ -699,6 +694,12 @@ select:focus { border-color: var(--accent); }
           <option value="rotate">Rotate</option>
           <option value="bounce">Bounce</option>
           <option value="shake">Shake</option>
+          <option value="typewriter">Typewriter</option>
+          <option value="glitch">Glitch</option>
+          <option value="orbit">Orbit</option>
+          <option value="morph">Morph</option>
+          <option value="rainbow-glow">Rainbow Glow</option>
+          <option value="breathe-scale">Breathe Scale</option>
         </select>
       </div>
       <div class="row" id="animSpeedRow" style="display:none;">
@@ -706,9 +707,55 @@ select:focus { border-color: var(--accent); }
         <input type="range" id="animationSpeed" min="0" max="100" step="1" value="50">
         <span class="row-value" id="animSpeedVal">50</span>
       </div>
+      <div class="row" id="animAmplitudeRow" style="display:none;">
+        <label>Amplitude</label>
+        <input type="range" id="animAmplitude" min="1" max="100" step="1" value="50">
+        <span class="row-value" id="animAmplitudeVal">50</span>
+      </div>
+      <div class="row" id="animEasingRow" style="display:none;">
+        <label>Easing</label>
+        <select id="animEasing">
+          <option value="linear">Linear</option>
+          <option value="ease-in-out">Ease In-Out</option>
+          <option value="elastic">Elastic</option>
+          <option value="bounce-back">Bounce Back</option>
+        </select>
+      </div>
+      <div class="row" id="animDirectionRow" style="display:none;">
+        <label>Direction</label>
+        <select id="animDirection">
+          <option value="normal">Normal</option>
+          <option value="reverse">Reverse</option>
+        </select>
+      </div>
+      <div class="row" id="animLoopCountRow" style="display:none;">
+        <label>Loop Count</label>
+        <select id="animLoopCount">
+          <option value="infinite">Infinite</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="5">5</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+      <div class="row" id="animDelayRow" style="display:none;">
+        <label>Delay (ms)</label>
+        <input type="range" id="animDelay" min="0" max="2000" step="50" value="0">
+        <span class="row-value" id="animDelayVal">0</span>
+      </div>
+      <div class="row" id="animMorphTargetRow" style="display:none;">
+        <label>Morph To</label>
+        <input type="text" class="symbol-input" id="animMorphTarget" value="★" maxlength="4" spellcheck="false" autocomplete="off" style="font-size:20px;padding:6px;width:60px;">
+      </div>
+      <div class="row" id="animTimelineRow" style="display:none;">
+        <label>Timeline</label>
+        <input type="range" id="animTimeline" min="0" max="100" step="1" value="0">
+        <span class="row-value" id="animTimelineVal">0%</span>
+      </div>
       <div class="row" id="animToggleRow" style="display:none;">
         <label>Preview</label>
-        <label class="toggle"><input type="checkbox" id="animToggle"><span class="toggle-track"></span></label>
+        <button class="btn btn-secondary" id="animPlayPauseBtn" style="width:auto;min-width:50px;padding:4px 14px;font-size:16px;">&#9654;</button>
       </div>
     </div>
 
@@ -747,6 +794,13 @@ select:focus { border-color: var(--accent); }
       </div>
       <div class="export-row" style="margin-top: 8px;">
         <button class="btn btn-secondary" id="exportGifBtn" style="flex:1;">Export GIF</button>
+      </div>
+      <div class="export-row" style="margin-top: 8px;">
+        <button class="btn btn-secondary" id="exportApngBtn" style="flex:1;">Export APNG</button>
+      </div>
+      <div class="export-row" style="margin-top: 8px;">
+        <button class="btn btn-secondary" id="exportCssAnimBtn" style="flex:1;">Copy CSS Animation</button>
+        <button class="btn btn-secondary" id="exportLottieBtn" style="flex:1;">Export Lottie</button>
       </div>
       <div class="export-row" style="margin-top: 8px;">
         <button class="btn btn-secondary" id="platformPackBtn" style="flex:1;">Platform Pack</button>
@@ -1307,21 +1361,19 @@ const COLLECTIONS = {
 const STATE_DEFAULTS = {
   symbol: '⚡', symbolColor: '#E8751A', symbolSize: 55, symbolFont: 'system', symbolWeight: 'normal',
   bgColor: '#0D0D0F', borderEnabled: true, borderColor: '#E8751A', borderAutoColor: true,
-  borderWidth: 2, cornerRadius: 22, glowIntensity: 25, yOffset: 0, transparentBg: false,
+  borderWidth: 2, cornerRadius: 22, glowIntensity: 25, glowRadius: 25, yOffset: 0, xOffset: 0, tilt: 0, transparentBg: false,
   // Gradient
   bgType: 'solid', bgGradientColor2: '#1a1a2e', bgGradientAngle: 135,
   // Background Image
   bgImageData: null, bgImageOpacity: 100,
   // Background Pattern
   bgPattern: 'none', bgPatternScale: 100, bgPatternOpacity: 30, bgPatternColor: '#ffffff',
-  // Drop Shadow
-  dropShadow: false, dropShadowColor: '#000000', dropShadowBlur: 15, dropShadowX: 5, dropShadowY: 5,
-  // Inner Shadow
-  innerShadow: false, innerShadowColor: '#000000', innerShadowBlur: 10,
   // Layers
   layers: [],
   // Animation
   animationType: 'none', animationSpeed: 50,
+  animAmplitude: 50, animEasing: 'linear', animDirection: 'normal',
+  animLoopCount: 'infinite', animDelay: 0, animMorphTarget: '★', animTimeline: -1,
   // Google Font
   googleFontName: '',
   // Custom SVG
@@ -1392,8 +1444,6 @@ function restoreFromHistory() {
   buildLayerUI();
   updateGradientUI();
   updatePatternUI();
-  updateDropShadowUI();
-  updateInnerShadowUI();
   updateAnimUI();
   updateGoogleFontUI();
   updateContrastBadge();
@@ -1455,32 +1505,14 @@ function randomize() {
   state.borderWidth = +(1 + Math.random() * 3).toFixed(1);
 
   // Effects
-  state.glowIntensity = Math.floor(Math.random() * 60);
+  state.glowIntensity = Math.floor(Math.random() * 150);
+  state.glowRadius = 15 + Math.floor(Math.random() * 50);
   state.symbolSize = 40 + Math.floor(Math.random() * 30);
   state.cornerRadius = Math.floor(Math.random() * 40);
+  state.xOffset = 0;
   state.yOffset = 0;
+  state.tilt = Math.random() < 0.3 ? Math.floor(Math.random() * 30) - 15 : 0;
   state.transparentBg = false;
-
-  // Drop Shadow (20% chance)
-  state.dropShadow = Math.random() < 0.2;
-  if (state.dropShadow) {
-    state.dropShadowColor = '#000000';
-    state.dropShadowBlur = 10 + Math.floor(Math.random() * 20);
-    state.dropShadowX = Math.floor(Math.random() * 10);
-    state.dropShadowY = Math.floor(Math.random() * 10);
-  } else {
-    state.dropShadowBlur = 15; state.dropShadowX = 5; state.dropShadowY = 5;
-    state.dropShadowColor = '#000000';
-  }
-
-  // Inner Shadow (15% chance)
-  state.innerShadow = Math.random() < 0.15;
-  if (state.innerShadow) {
-    state.innerShadowColor = '#000000';
-    state.innerShadowBlur = 5 + Math.floor(Math.random() * 20);
-  } else {
-    state.innerShadowBlur = 10; state.innerShadowColor = '#000000';
-  }
 
   // Background Pattern (25% chance)
   if (Math.random() < 0.25) {
@@ -1522,6 +1554,13 @@ function randomize() {
   }
 
   state.animationType = 'none';
+  state.animAmplitude = 50;
+  state.animEasing = 'linear';
+  state.animDirection = 'normal';
+  state.animLoopCount = 'infinite';
+  state.animDelay = 0;
+  state.animMorphTarget = '★';
+  state.animTimeline = -1;
 
   // Clear custom SVG and google font on randomize
   state.customSvgData = null;
@@ -1531,8 +1570,6 @@ function randomize() {
   buildLayerUI();
   updateGradientUI();
   updatePatternUI();
-  updateDropShadowUI();
-  updateInnerShadowUI();
   updateAnimUI();
   updateGoogleFontUI();
   updateContrastBadge();
@@ -1640,7 +1677,7 @@ function measureGlyphYCorrection(symbol, fontSize, fontSpec) {
 }
 
 // Render a single symbol layer on the canvas
-function renderSymbolLayer(ctx, size, sym, color, symSize, yOff, xOff, opacity, glow, fontFamily, weight) {
+function renderSymbolLayer(ctx, size, sym, color, symSize, yOff, xOff, opacity, glow, fontFamily, weight, tiltDeg, glowRadius) {
   const maxDim = (symSize / 100) * size;
   let fontSize = maxDim;
   const fontFam = fontFamily || getFontFamily('system');
@@ -1664,15 +1701,25 @@ function renderSymbolLayer(ctx, size, sym, color, symSize, yOff, xOff, opacity, 
   ctx.save();
   ctx.globalAlpha = (opacity != null ? opacity : 100) / 100;
 
-  // Glow layers
+  // Apply tilt/rotation around the symbol center
+  const tilt = tiltDeg || 0;
+  if (tilt !== 0) {
+    ctx.translate(cx, cy);
+    ctx.rotate(tilt * Math.PI / 180);
+    ctx.translate(-cx, -cy);
+  }
+
+  // Glow layers — glowRadius controls spread, glow controls intensity/brightness
+  const gr = glowRadius != null ? glowRadius : 25;
   if (glow > 0) {
-    const glowR = (glow / 100) * size * 0.25;
+    const glowR = (gr / 100) * size * 0.25;
+    const intensity = glow / 100; // can exceed 1.0 since max is now 1000
 
     ctx.save();
     ctx.shadowColor = color;
     ctx.shadowBlur = glowR * 2.5;
     ctx.fillStyle = color;
-    ctx.globalAlpha *= 0.3;
+    ctx.globalAlpha *= Math.min(0.3 * intensity, 1);
     ctx.fillText(sym, cx, cy);
     ctx.restore();
 
@@ -1681,9 +1728,24 @@ function renderSymbolLayer(ctx, size, sym, color, symSize, yOff, xOff, opacity, 
     ctx.shadowColor = color;
     ctx.shadowBlur = glowR;
     ctx.fillStyle = color;
-    ctx.globalAlpha *= 0.6;
+    ctx.globalAlpha *= Math.min(0.6 * intensity, 1);
     ctx.fillText(sym, cx, cy);
     ctx.restore();
+
+    // Extra glow passes for high intensity (>100)
+    if (intensity > 1) {
+      const passes = Math.min(Math.floor(intensity), 8);
+      for (let i = 0; i < passes; i++) {
+        ctx.save();
+        ctx.globalAlpha = (opacity != null ? opacity : 100) / 100;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = glowR * (1.5 + i * 0.5);
+        ctx.fillStyle = color;
+        ctx.globalAlpha *= Math.min(0.25 * intensity / passes, 0.9);
+        ctx.fillText(sym, cx, cy);
+        ctx.restore();
+      }
+    }
 
     // restore alpha for the sharp pass
     ctx.globalAlpha = (opacity != null ? opacity : 100) / 100;
@@ -1692,8 +1754,9 @@ function renderSymbolLayer(ctx, size, sym, color, symSize, yOff, xOff, opacity, 
   // Sharp symbol
   ctx.fillStyle = color;
   if (glow > 0) {
+    const gr2 = (gr / 100) * size * 0.04;
     ctx.shadowColor = color;
-    ctx.shadowBlur = (glow / 100) * size * 0.04;
+    ctx.shadowBlur = gr2;
   }
   ctx.fillText(sym, cx, cy);
   ctx.shadowBlur = 0;
@@ -1802,55 +1865,11 @@ function renderBgPattern(ctx, size, s) {
   ctx.restore();
 }
 
-function renderInnerShadow(ctx, size, s) {
-  if (!s.innerShadow) return;
-  const r = (s.cornerRadius / 100) * size;
-  const blur = (s.innerShadowBlur || 10) / 50 * size * 0.15;
-  const color = s.innerShadowColor || '#000000';
-
-  ctx.save();
-  // Draw inset shadow by stroking a large rect outside the shape with shadow inward
-  ctx.beginPath();
-  // Outer huge rect (counterclockwise)
-  ctx.rect(-size, -size, size * 3, size * 3);
-  // Inner rounded rect (clockwise as cutout)
-  roundedRect(ctx, 0, 0, size, size, r);
-  ctx.clip('evenodd');
-
-  ctx.shadowColor = color;
-  ctx.shadowBlur = blur;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-  ctx.fillStyle = color;
-  // Fill the outside area — its shadow will project inward
-  ctx.beginPath();
-  ctx.rect(-size, -size, size * 3, size * 3);
-  roundedRect(ctx, 0, 0, size, size, r);
-  ctx.fill('evenodd');
-  ctx.restore();
-}
-
 function renderIcon(ctx, size, s) {
   const r = (s.cornerRadius / 100) * size;
   const bw = s.borderEnabled ? (s.borderWidth / 100) * size : 0;
 
   ctx.clearRect(0, 0, size, size);
-
-  // Drop Shadow — rendered BEFORE clipping the main shape
-  if (s.dropShadow) {
-    ctx.save();
-    const dsBlur = (s.dropShadowBlur || 15) / 50 * size * 0.12;
-    const dsX = (s.dropShadowX || 5) / 30 * size * 0.06;
-    const dsY = (s.dropShadowY || 5) / 30 * size * 0.06;
-    ctx.shadowColor = s.dropShadowColor || '#000000';
-    ctx.shadowBlur = dsBlur;
-    ctx.shadowOffsetX = dsX;
-    ctx.shadowOffsetY = dsY;
-    ctx.fillStyle = 'rgba(0,0,0,1)';
-    roundedRect(ctx, 0, 0, size, size, r);
-    ctx.fill();
-    ctx.restore();
-  }
 
   ctx.save();
 
@@ -1906,16 +1925,13 @@ function renderIcon(ctx, size, s) {
     renderBgPattern(ctx, size, s);
   }
 
-  // Inner shadow (after background, before symbols)
-  renderInnerShadow(ctx, size, s);
-
   // Render main symbol (layer 0) — check for custom SVG first
   if (s.customSvgData) {
     renderCustomSvg(ctx, size, s);
   } else {
     const fontFam = getFontFamily(s.symbolFont);
     const weight = s.symbolWeight === 'bold' ? 'bold' : 'normal';
-    renderSymbolLayer(ctx, size, s.symbol, s.symbolColor, s.symbolSize, s.yOffset, 0, 100, s.glowIntensity, fontFam, weight);
+    renderSymbolLayer(ctx, size, s.symbol, s.symbolColor, s.symbolSize, s.yOffset, s.xOffset || 0, 100, s.glowIntensity, fontFam, weight, s.tilt || 0, s.glowRadius);
   }
 
   // Render additional layers
@@ -1945,10 +1961,49 @@ function renderIcon(ctx, size, s) {
 let animationRunning = false;
 let animationFrameId = null;
 let animationStartTime = 0;
+let animationLoopsDone = 0;
+let animationDelayTimer = null;
+let animationScrubbing = false;
 
 function getAnimDuration(speed) {
   // Speed 0 = 3s, Speed 100 = 0.3s
   return 3 - (speed / 100) * 2.7;
+}
+
+// Easing functions: take progress 0-1, return eased progress 0-1
+function easingLinear(t) { return t; }
+function easingEaseInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+function easingElastic(t) {
+  if (t === 0 || t === 1) return t;
+  return Math.pow(2, -10 * t) * Math.sin((t - 0.075) * (2 * Math.PI) / 0.3) + 1;
+}
+function easingBounceBack(t) {
+  if (t < 1 / 2.75) return 7.5625 * t * t;
+  if (t < 2 / 2.75) { t -= 1.5 / 2.75; return 7.5625 * t * t + 0.75; }
+  if (t < 2.5 / 2.75) { t -= 2.25 / 2.75; return 7.5625 * t * t + 0.9375; }
+  t -= 2.625 / 2.75; return 7.5625 * t * t + 0.984375;
+}
+
+function getEasingFn(name) {
+  switch (name) {
+    case 'ease-in-out': return easingEaseInOut;
+    case 'elastic': return easingElastic;
+    case 'bounce-back': return easingBounceBack;
+    default: return easingLinear;
+  }
+}
+
+function applyEasing(progress) {
+  const fn = getEasingFn(state.animEasing || 'linear');
+  return fn(progress);
+}
+
+function applyDirection(progress) {
+  return state.animDirection === 'reverse' ? 1 - progress : progress;
+}
+
+function getAmplitudeFactor() {
+  return (state.animAmplitude || 50) / 50; // 0.02 to 2.0
 }
 
 function stopAnimation() {
@@ -1957,51 +2012,246 @@ function stopAnimation() {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
   }
+  if (animationDelayTimer) {
+    clearTimeout(animationDelayTimer);
+    animationDelayTimer = null;
+  }
+  animationLoopsDone = 0;
   // Reset transform on preview canvas
   const c = $('preview');
   c.style.transform = '';
+  c.style.filter = '';
+  updatePreview();
 }
 
 function startAnimation() {
   if (state.animationType === 'none') return;
   animationRunning = true;
+  animationLoopsDone = 0;
   animationStartTime = performance.now();
+  animationScrubbing = false;
   animateLoop();
+}
+
+function renderAnimationFrame(progress, target) {
+  // target: 'preview' or {ctx, size} for export
+  const type = state.animationType;
+  const amp = getAmplitudeFactor();
+  const dir = applyDirection(progress);
+  const eased = applyEasing(dir);
+
+  if (target === 'preview') {
+    const c = $('preview');
+    c.style.filter = '';
+
+    if (type === 'rotate') {
+      const deg = eased * 360;
+      c.style.transform = `rotate(${deg}deg)`;
+    } else if (type === 'bounce') {
+      const y = Math.sin(eased * Math.PI * 2) * 10 * amp;
+      c.style.transform = `translateY(${y}px)`;
+    } else if (type === 'shake') {
+      const x = Math.sin(eased * Math.PI * 8) * 4 * amp;
+      c.style.transform = `translateX(${x}px)`;
+    } else if (type === 'pulse') {
+      const scale = 1 + Math.sin(eased * Math.PI * 2) * 0.08 * amp;
+      c.style.transform = `scale(${scale})`;
+    } else if (type === 'breathe-scale') {
+      const t = eased * Math.PI * 2;
+      const scale = 1 + (Math.sin(t) * 0.5 + 0.5) * 0.15 * amp - 0.075 * amp;
+      c.style.transform = `scale(${scale})`;
+    } else if (type === 'orbit') {
+      const angle = eased * Math.PI * 2;
+      const radius = 15 * amp;
+      const ox = Math.cos(angle) * radius;
+      const oy = Math.sin(angle) * radius;
+      c.style.transform = `translate(${ox}px, ${oy}px)`;
+    } else if (type === 'glitch') {
+      c.style.transform = '';
+      // Random jitter for glitch
+      const jx = (Math.random() - 0.5) * 8 * amp;
+      const jy = (Math.random() - 0.5) * 4 * amp;
+      const skew = (Math.random() - 0.5) * 3 * amp;
+      c.style.transform = `translate(${jx}px, ${jy}px) skewX(${skew}deg)`;
+      // Hue shift for color split effect
+      const hueShift = Math.random() * 30 * amp;
+      c.style.filter = `hue-rotate(${hueShift}deg)`;
+    } else if (type === 'glow-breathe') {
+      c.style.transform = '';
+      const baseGlow = state.glowIntensity;
+      const glowMod = baseGlow + Math.sin(eased * Math.PI * 2) * 30 * amp;
+      const tempState = { ...state, glowIntensity: Math.max(0, Math.min(100, glowMod)) };
+      renderIcon(pCtx, 600, tempState);
+      return;
+    } else if (type === 'rainbow-glow') {
+      c.style.transform = '';
+      const hue = eased * 360;
+      const glowColor = `hsl(${hue}, 100%, 60%)`;
+      const tempState = deepCopyState(state);
+      tempState.symbolColor = glowColor;
+      if (tempState.borderAutoColor) tempState.borderColor = glowColor;
+      renderIcon(pCtx, 600, tempState);
+      return;
+    } else if (type === 'typewriter') {
+      c.style.transform = '';
+      const sym = state.symbol || '';
+      const chars = [...sym]; // handle multi-byte properly
+      const visibleCount = Math.floor(eased * (chars.length + 1));
+      const partial = chars.slice(0, visibleCount).join('');
+      const tempState = deepCopyState(state);
+      tempState.symbol = partial;
+      renderIcon(pCtx, 600, tempState);
+      return;
+    } else if (type === 'morph') {
+      c.style.transform = '';
+      const tempState = deepCopyState(state);
+      // Cross-fade: first half shows original fading out, second half shows target fading in
+      if (eased < 0.5) {
+        const opacity = 1 - eased * 2;
+        tempState.glowIntensity = Math.round(state.glowIntensity * opacity);
+        const scale = 1 - eased * 0.3 * amp;
+        tempState.symbolSize = Math.round(state.symbolSize * scale);
+      } else {
+        tempState.symbol = state.animMorphTarget || '★';
+        const opacity = (eased - 0.5) * 2;
+        tempState.glowIntensity = Math.round(state.glowIntensity * opacity);
+        const scale = 0.7 * amp + (1 - 0.7 * amp) * (eased - 0.5) * 2;
+        tempState.symbolSize = Math.round(state.symbolSize * Math.min(1, scale + (1 - amp) * 0.3));
+      }
+      renderIcon(pCtx, 600, tempState);
+      return;
+    }
+  } else {
+    // Export rendering to ctx/size
+    const { ctx, size } = target;
+    const tempState = deepCopyState(state);
+
+    if (type === 'glow-breathe') {
+      const baseGlow = state.glowIntensity;
+      const glowMod = baseGlow + Math.sin(eased * Math.PI * 2) * 30 * amp;
+      tempState.glowIntensity = Math.max(0, Math.min(100, glowMod));
+      renderIcon(ctx, size, tempState);
+    } else if (type === 'rainbow-glow') {
+      const hue = eased * 360;
+      const glowColor = `hsl(${hue}, 100%, 60%)`;
+      tempState.symbolColor = glowColor;
+      if (tempState.borderAutoColor) tempState.borderColor = glowColor;
+      renderIcon(ctx, size, tempState);
+    } else if (type === 'typewriter') {
+      const sym = state.symbol || '';
+      const chars = [...sym];
+      const visibleCount = Math.floor(eased * (chars.length + 1));
+      tempState.symbol = chars.slice(0, visibleCount).join('');
+      renderIcon(ctx, size, tempState);
+    } else if (type === 'morph') {
+      if (eased < 0.5) {
+        const scale = 1 - eased * 0.3 * amp;
+        tempState.symbolSize = Math.round(state.symbolSize * scale);
+        tempState.glowIntensity = Math.round(state.glowIntensity * (1 - eased * 2));
+      } else {
+        tempState.symbol = state.animMorphTarget || '★';
+        const scale = 0.7 * amp + (1 - 0.7 * amp) * (eased - 0.5) * 2;
+        tempState.symbolSize = Math.round(state.symbolSize * Math.min(1, scale + (1 - amp) * 0.3));
+        tempState.glowIntensity = Math.round(state.glowIntensity * ((eased - 0.5) * 2));
+      }
+      renderIcon(ctx, size, tempState);
+    } else {
+      // Transform-based: render then apply transform on second canvas
+      renderIcon(ctx, size, state);
+      const c2 = document.createElement('canvas');
+      c2.width = size; c2.height = size;
+      const ctx2 = c2.getContext('2d');
+      ctx2.save();
+      ctx2.translate(size / 2, size / 2);
+      if (type === 'rotate') {
+        ctx2.rotate(eased * Math.PI * 2);
+      } else if (type === 'bounce') {
+        const y = Math.sin(eased * Math.PI * 2) * size * 0.03 * amp;
+        ctx2.translate(0, y);
+      } else if (type === 'shake') {
+        const x = Math.sin(eased * Math.PI * 8) * size * 0.015 * amp;
+        ctx2.translate(x, 0);
+      } else if (type === 'pulse') {
+        const scale = 1 + Math.sin(eased * Math.PI * 2) * 0.08 * amp;
+        ctx2.scale(scale, scale);
+      } else if (type === 'breathe-scale') {
+        const t = eased * Math.PI * 2;
+        const scale = 1 + (Math.sin(t) * 0.5 + 0.5) * 0.15 * amp - 0.075 * amp;
+        ctx2.scale(scale, scale);
+      } else if (type === 'orbit') {
+        const angle = eased * Math.PI * 2;
+        const radius = size * 0.05 * amp;
+        ctx2.translate(Math.cos(angle) * radius, Math.sin(angle) * radius);
+      } else if (type === 'glitch') {
+        const jx = (Math.random() - 0.5) * size * 0.03 * amp;
+        const jy = (Math.random() - 0.5) * size * 0.015 * amp;
+        ctx2.translate(jx, jy);
+      }
+      ctx2.translate(-size / 2, -size / 2);
+      ctx2.drawImage(ctx.canvas, 0, 0);
+      ctx2.restore();
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(c2, 0, 0);
+    }
+  }
+}
+
+// Render animation frame for a specific layer during per-layer animation
+function renderLayerAnimFrame(layerState, progress) {
+  const type = layerState.animationType || 'none';
+  if (type === 'none') return {};
+  const speed = layerState.animSpeed || 50;
+  const amp = 1.0; // layers use default amplitude
+  const eased = progress;
+  const result = { xOffset: 0, yOffset: 0, scale: 1, opacity: 1 };
+
+  if (type === 'bounce') {
+    result.yOffset = Math.sin(eased * Math.PI * 2) * 5 * amp;
+  } else if (type === 'shake') {
+    result.xOffset = Math.sin(eased * Math.PI * 8) * 3 * amp;
+  } else if (type === 'pulse') {
+    result.scale = 1 + Math.sin(eased * Math.PI * 2) * 0.1;
+  } else if (type === 'rotate') {
+    result.rotation = eased * 360;
+  } else if (type === 'orbit') {
+    const angle = eased * Math.PI * 2;
+    result.xOffset = Math.cos(angle) * 8;
+    result.yOffset = Math.sin(angle) * 8;
+  } else if (type === 'breathe-scale') {
+    const t = eased * Math.PI * 2;
+    result.scale = 1 + (Math.sin(t) * 0.5 + 0.5) * 0.2 - 0.1;
+  }
+  return result;
 }
 
 function animateLoop() {
   if (!animationRunning) return;
   const now = performance.now();
   const duration = getAnimDuration(state.animationSpeed) * 1000; // ms
-  const elapsed = (now - animationStartTime) % duration;
-  const progress = elapsed / duration; // 0..1
-  const c = $('preview');
+  const delay = state.animDelay || 0;
+  const totalCycleDuration = duration + delay;
+  const rawElapsed = now - animationStartTime;
+  const cycleIndex = Math.floor(rawElapsed / totalCycleDuration);
 
-  const type = state.animationType;
+  // Check loop count
+  const loopCount = state.animLoopCount;
+  if (loopCount !== 'infinite' && cycleIndex >= +loopCount) {
+    stopAnimation();
+    updatePlayPauseBtn();
+    return;
+  }
 
-  if (type === 'rotate') {
-    const deg = progress * 360;
-    c.style.transform = `rotate(${deg}deg)`;
-  } else if (type === 'bounce') {
-    const y = Math.sin(progress * Math.PI * 2) * 10;
-    c.style.transform = `translateY(${y}px)`;
-  } else if (type === 'shake') {
-    const x = Math.sin(progress * Math.PI * 8) * 4;
-    c.style.transform = `translateX(${x}px)`;
-  } else if (type === 'pulse') {
-    const scale = 1 + Math.sin(progress * Math.PI * 2) * 0.08;
-    c.style.transform = `scale(${scale})`;
-  } else if (type === 'glow-breathe') {
-    c.style.transform = '';
-    // Modify glow and re-render
-    const baseGlow = state.glowIntensity;
-    const glowMod = baseGlow + Math.sin(progress * Math.PI * 2) * 30;
-    const tempState = { ...state, glowIntensity: Math.max(0, Math.min(100, glowMod)) };
-    renderIcon(pCtx, 600, tempState);
+  const cycleElapsed = rawElapsed % totalCycleDuration;
+
+  // If in delay portion, hold at end or start
+  if (cycleElapsed > duration) {
+    // In the delay gap - just keep requesting frames
     animationFrameId = requestAnimationFrame(animateLoop);
     return;
   }
 
+  const progress = cycleElapsed / duration; // 0..1
+  renderAnimationFrame(progress, 'preview');
   animationFrameId = requestAnimationFrame(animateLoop);
 }
 
@@ -2022,11 +2272,20 @@ function renderCustomSvg(ctx, size, s) {
     let drawW, drawH;
     if (aspect >= 1) { drawW = maxDim; drawH = maxDim / aspect; }
     else { drawH = maxDim; drawW = maxDim * aspect; }
-    const cx = size / 2 - drawW / 2;
+    const cx = size / 2 - drawW / 2 + ((s.xOffset || 0) / 100) * size;
     const cy = size / 2 - drawH / 2 + ((s.yOffset || 0) / 100) * size;
     ctx.save();
+    // Apply tilt
+    if (s.tilt) {
+      const centerX = cx + drawW / 2;
+      const centerY = cy + drawH / 2;
+      ctx.translate(centerX, centerY);
+      ctx.rotate(s.tilt * Math.PI / 180);
+      ctx.translate(-centerX, -centerY);
+    }
     if (s.glowIntensity > 0) {
-      const glowR = (s.glowIntensity / 100) * size * 0.25;
+      const gr = s.glowRadius != null ? s.glowRadius : 25;
+      const glowR = (gr / 100) * size * 0.25;
       ctx.shadowColor = s.symbolColor;
       ctx.shadowBlur = glowR;
     }
@@ -2197,15 +2456,8 @@ function updateGoogleFontUI() {
 }
 
 // === GIF EXPORT (Feature 7) ===
-function getAnimatedState(s, progress) {
-  const tempState = deepCopyState(s);
-  const type = s.animationType;
-  if (type === 'glow-breathe') {
-    const baseGlow = s.glowIntensity;
-    const glowMod = baseGlow + Math.sin(progress * Math.PI * 2) * 30;
-    tempState.glowIntensity = Math.max(0, Math.min(100, glowMod));
-  }
-  return tempState;
+function renderExportFrame(ctx, size, progress) {
+  renderAnimationFrame(progress, { ctx, size });
 }
 
 async function exportGIF() {
@@ -2237,41 +2489,7 @@ async function exportGIF() {
     const c = document.createElement('canvas');
     c.width = size; c.height = size;
     const ctx = c.getContext('2d');
-    const type = state.animationType;
-
-    if (type === 'glow-breathe') {
-      const frameState = getAnimatedState(state, progress);
-      renderIcon(ctx, size, frameState);
-    } else {
-      // For transform-based animations, render normally then apply transform
-      renderIcon(ctx, size, state);
-      if (type === 'rotate' || type === 'bounce' || type === 'shake' || type === 'pulse') {
-        // Create a second canvas with the transform applied
-        const c2 = document.createElement('canvas');
-        c2.width = size; c2.height = size;
-        const ctx2 = c2.getContext('2d');
-        ctx2.save();
-        ctx2.translate(size / 2, size / 2);
-        if (type === 'rotate') {
-          ctx2.rotate(progress * Math.PI * 2);
-        } else if (type === 'bounce') {
-          const y = Math.sin(progress * Math.PI * 2) * size * 0.03;
-          ctx2.translate(0, y);
-        } else if (type === 'shake') {
-          const x = Math.sin(progress * Math.PI * 8) * size * 0.015;
-          ctx2.translate(x, 0);
-        } else if (type === 'pulse') {
-          const scale = 1 + Math.sin(progress * Math.PI * 2) * 0.08;
-          ctx2.scale(scale, scale);
-        }
-        ctx2.translate(-size / 2, -size / 2);
-        ctx2.drawImage(c, 0, 0);
-        ctx2.restore();
-        // Copy back
-        ctx.clearRect(0, 0, size, size);
-        ctx.drawImage(c2, 0, 0);
-      }
-    }
+    renderExportFrame(ctx, size, progress);
     gif.addFrame(ctx, { copy: true, delay: frameDelay });
   }
 
@@ -2284,6 +2502,437 @@ async function exportGIF() {
     showToast('Exported animated GIF');
   });
   gif.render();
+}
+
+// === APNG EXPORT ===
+async function exportAPNG() {
+  if (state.animationType === 'none') {
+    showToast('Set an animation type first');
+    return;
+  }
+  const size = +$('exportSize').value;
+  const frames = 24;
+  const duration = getAnimDuration(state.animationSpeed);
+  const frameDelayMs = Math.round((duration * 1000) / frames);
+
+  showToast('Generating APNG...');
+
+  // Collect PNG frames
+  const pngFrames = [];
+  for (let i = 0; i < frames; i++) {
+    const progress = i / frames;
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    renderExportFrame(ctx, size, progress);
+    const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    const buf = await blob.arrayBuffer();
+    pngFrames.push(new Uint8Array(buf));
+  }
+
+  // Build APNG manually
+  const apngBlob = buildAPNG(pngFrames, frameDelayMs, size);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(apngBlob);
+  a.download = `icon-animated-${size}x${size}.apng`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Exported animated APNG');
+}
+
+function buildAPNG(pngFrames, delayMs, size) {
+  // Parse first PNG to get its structure
+  // APNG = PNG signature + IHDR + acTL + (fcTL + fdAT for each frame) + IEND
+  // For simplicity: use first frame as default image, add animation chunks
+
+  function readUint32(data, offset) {
+    return (data[offset] << 24) | (data[offset+1] << 16) | (data[offset+2] << 8) | data[offset+3];
+  }
+  function writeUint32(arr, offset, val) {
+    arr[offset] = (val >>> 24) & 0xff;
+    arr[offset+1] = (val >>> 16) & 0xff;
+    arr[offset+2] = (val >>> 8) & 0xff;
+    arr[offset+3] = val & 0xff;
+  }
+
+  // CRC32 table
+  const crcTable = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    crcTable[n] = c;
+  }
+  function crc32(data, start, len) {
+    let crc = 0xFFFFFFFF;
+    for (let i = start; i < start + len; i++) crc = crcTable[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    return crc ^ 0xFFFFFFFF;
+  }
+
+  function makeChunk(type, data) {
+    const len = data.length;
+    const chunk = new Uint8Array(12 + len);
+    writeUint32(chunk, 0, len);
+    chunk[4] = type.charCodeAt(0); chunk[5] = type.charCodeAt(1);
+    chunk[6] = type.charCodeAt(2); chunk[7] = type.charCodeAt(3);
+    chunk.set(data, 8);
+    const crcVal = crc32(chunk, 4, 4 + len);
+    writeUint32(chunk, 8 + len, crcVal);
+    return chunk;
+  }
+
+  // Extract IDAT chunks from a PNG
+  function extractIDAT(pngData) {
+    const chunks = [];
+    let offset = 8; // skip signature
+    while (offset < pngData.length) {
+      const chunkLen = readUint32(pngData, offset);
+      const chunkType = String.fromCharCode(pngData[offset+4], pngData[offset+5], pngData[offset+6], pngData[offset+7]);
+      if (chunkType === 'IDAT') {
+        chunks.push(pngData.slice(offset + 8, offset + 8 + chunkLen));
+      }
+      offset += 12 + chunkLen;
+    }
+    // Concatenate all IDAT data
+    const totalLen = chunks.reduce((s, c) => s + c.length, 0);
+    const result = new Uint8Array(totalLen);
+    let pos = 0;
+    for (const c of chunks) { result.set(c, pos); pos += c.length; }
+    return result;
+  }
+
+  // Extract IHDR from first frame
+  function extractIHDR(pngData) {
+    let offset = 8;
+    const chunkLen = readUint32(pngData, offset);
+    return pngData.slice(offset, offset + 12 + chunkLen);
+  }
+
+  const pngSignature = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+  const numFrames = pngFrames.length;
+  const delayNum = delayMs;
+  const delayDen = 1000;
+
+  // Build acTL chunk (animation control)
+  const acTLData = new Uint8Array(8);
+  writeUint32(acTLData, 0, numFrames); // num_frames
+  writeUint32(acTLData, 4, 0); // num_plays (0 = infinite)
+  const acTL = makeChunk('acTL', acTLData);
+
+  // Build all frame chunks
+  const allChunks = [];
+  let sequenceNumber = 0;
+
+  for (let i = 0; i < numFrames; i++) {
+    // fcTL chunk (frame control)
+    const fcTLData = new Uint8Array(26);
+    writeUint32(fcTLData, 0, sequenceNumber++); // sequence_number
+    writeUint32(fcTLData, 4, size); // width
+    writeUint32(fcTLData, 8, size); // height
+    writeUint32(fcTLData, 12, 0); // x_offset
+    writeUint32(fcTLData, 16, 0); // y_offset
+    fcTLData[20] = (delayNum >> 8) & 0xff; fcTLData[21] = delayNum & 0xff; // delay_num
+    fcTLData[22] = (delayDen >> 8) & 0xff; fcTLData[23] = delayDen & 0xff; // delay_den
+    fcTLData[24] = 0; // dispose_op: none
+    fcTLData[25] = 0; // blend_op: source
+    allChunks.push(makeChunk('fcTL', fcTLData));
+
+    const idatData = extractIDAT(pngFrames[i]);
+
+    if (i === 0) {
+      // First frame uses IDAT
+      allChunks.push(makeChunk('IDAT', idatData));
+    } else {
+      // Subsequent frames use fdAT (sequence_number + data)
+      const fdATData = new Uint8Array(4 + idatData.length);
+      writeUint32(fdATData, 0, sequenceNumber++);
+      fdATData.set(idatData, 4);
+      allChunks.push(makeChunk('fdAT', fdATData));
+    }
+  }
+
+  const ihdr = extractIHDR(pngFrames[0]);
+  const iend = makeChunk('IEND', new Uint8Array(0));
+
+  // Calculate total size
+  const totalSize = pngSignature.length + ihdr.length + acTL.length +
+    allChunks.reduce((s, c) => s + c.length, 0) + iend.length;
+  const result = new Uint8Array(totalSize);
+  let pos = 0;
+  result.set(pngSignature, pos); pos += pngSignature.length;
+  result.set(ihdr, pos); pos += ihdr.length;
+  result.set(acTL, pos); pos += acTL.length;
+  for (const chunk of allChunks) { result.set(chunk, pos); pos += chunk.length; }
+  result.set(iend, pos);
+
+  return new Blob([result], { type: 'image/apng' });
+}
+
+// === CSS ANIMATION EXPORT ===
+function generateCSSAnimation() {
+  if (state.animationType === 'none') {
+    showToast('Set an animation type first');
+    return;
+  }
+  const type = state.animationType;
+  const duration = getAnimDuration(state.animationSpeed);
+  const amp = getAmplitudeFactor();
+  const dir = state.animDirection === 'reverse' ? 'reverse' : 'normal';
+  const loopCount = state.animLoopCount === 'infinite' ? 'infinite' : state.animLoopCount;
+  const delay = (state.animDelay || 0) / 1000;
+  let easingCSS = 'linear';
+  if (state.animEasing === 'ease-in-out') easingCSS = 'ease-in-out';
+  else if (state.animEasing === 'elastic') easingCSS = 'cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+  else if (state.animEasing === 'bounce-back') easingCSS = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+  let keyframes = '';
+  let animName = `iconForge-${type}`;
+
+  if (type === 'pulse') {
+    const scale = 1 + 0.08 * amp;
+    keyframes = `@keyframes ${animName} {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(${scale.toFixed(3)}); }
+}`;
+  } else if (type === 'rotate') {
+    keyframes = `@keyframes ${animName} {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}`;
+  } else if (type === 'bounce') {
+    const y = 10 * amp;
+    keyframes = `@keyframes ${animName} {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(${y.toFixed(1)}px); }
+  75% { transform: translateY(${(-y).toFixed(1)}px); }
+}`;
+  } else if (type === 'shake') {
+    const x = 4 * amp;
+    keyframes = `@keyframes ${animName} {
+  0%, 100% { transform: translateX(0); }
+  12.5% { transform: translateX(${x.toFixed(1)}px); }
+  37.5% { transform: translateX(${(-x).toFixed(1)}px); }
+  62.5% { transform: translateX(${x.toFixed(1)}px); }
+  87.5% { transform: translateX(${(-x).toFixed(1)}px); }
+}`;
+  } else if (type === 'glow-breathe') {
+    const baseGlow = state.glowIntensity;
+    const minG = Math.max(0, baseGlow - 30 * amp);
+    const maxG = Math.min(100, baseGlow + 30 * amp);
+    keyframes = `@keyframes ${animName} {
+  0%, 100% { filter: drop-shadow(0 0 ${minG}px ${state.symbolColor}); }
+  50% { filter: drop-shadow(0 0 ${maxG}px ${state.symbolColor}); }
+}`;
+  } else if (type === 'breathe-scale') {
+    const maxScale = 1 + 0.15 * amp;
+    keyframes = `@keyframes ${animName} {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(${maxScale.toFixed(3)}); }
+}`;
+  } else if (type === 'orbit') {
+    const r = 15 * amp;
+    keyframes = `@keyframes ${animName} {
+  0% { transform: translate(${r.toFixed(1)}px, 0); }
+  25% { transform: translate(0, ${r.toFixed(1)}px); }
+  50% { transform: translate(${(-r).toFixed(1)}px, 0); }
+  75% { transform: translate(0, ${(-r).toFixed(1)}px); }
+  100% { transform: translate(${r.toFixed(1)}px, 0); }
+}`;
+  } else if (type === 'glitch') {
+    keyframes = `@keyframes ${animName} {
+  0%, 100% { transform: translate(0, 0) skewX(0deg); filter: none; }
+  10% { transform: translate(${(4*amp).toFixed(1)}px, ${(-2*amp).toFixed(1)}px) skewX(${(2*amp).toFixed(1)}deg); filter: hue-rotate(15deg); }
+  20% { transform: translate(${(-3*amp).toFixed(1)}px, ${(1*amp).toFixed(1)}px) skewX(${(-1*amp).toFixed(1)}deg); filter: hue-rotate(30deg); }
+  30% { transform: translate(0, 0) skewX(0deg); filter: none; }
+  50% { transform: translate(${(2*amp).toFixed(1)}px, ${(-3*amp).toFixed(1)}px) skewX(${(1.5*amp).toFixed(1)}deg); filter: hue-rotate(10deg); }
+  60% { transform: translate(0, 0) skewX(0deg); filter: none; }
+}`;
+  } else if (type === 'rainbow-glow') {
+    keyframes = `@keyframes ${animName} {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}`;
+  } else if (type === 'typewriter') {
+    const len = [...(state.symbol || '')].length;
+    keyframes = `/* Typewriter effect requires JS for character-by-character reveal */
+@keyframes ${animName} {
+  0% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}`;
+  } else if (type === 'morph') {
+    keyframes = `/* Morph effect requires JS to swap symbols */
+@keyframes ${animName} {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  45% { transform: scale(${(1 - 0.15*amp).toFixed(3)}); opacity: 0; }
+  55% { transform: scale(${(1 - 0.15*amp).toFixed(3)}); opacity: 0; }
+  50% { transform: scale(${(1 - 0.15*amp).toFixed(3)}); opacity: 0; }
+}`;
+  }
+
+  const css = `${keyframes}
+
+.icon-animated {
+  animation: ${animName} ${duration.toFixed(2)}s ${easingCSS} ${delay}s ${loopCount} ${dir};
+}`;
+
+  navigator.clipboard.writeText(css).then(() => {
+    showToast('CSS animation copied to clipboard');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = css; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('CSS animation copied to clipboard');
+  });
+}
+
+// === LOTTIE EXPORT ===
+function exportLottie() {
+  if (state.animationType === 'none') {
+    showToast('Set an animation type first');
+    return;
+  }
+  const type = state.animationType;
+  const duration = getAnimDuration(state.animationSpeed);
+  const fps = 30;
+  const totalFrames = Math.round(fps * duration);
+  const amp = getAmplitudeFactor();
+
+  // Build a simplified Lottie JSON
+  const lottie = {
+    v: '5.7.4',
+    fr: fps,
+    ip: 0,
+    op: totalFrames,
+    w: 512,
+    h: 512,
+    nm: 'Icon Forge Animation',
+    ddd: 0,
+    assets: [],
+    layers: [{
+      ddd: 0,
+      ind: 1,
+      ty: 4, // shape layer
+      nm: 'Icon',
+      sr: 1,
+      ks: {
+        o: { a: 0, k: 100 }, // opacity
+        r: { a: 0, k: 0 },   // rotation
+        p: { a: 0, k: [256, 256, 0] }, // position
+        a: { a: 0, k: [256, 256, 0] }, // anchor
+        s: { a: 0, k: [100, 100, 100] } // scale
+      },
+      ao: 0,
+      shapes: [{
+        ty: 'rc', // rectangle
+        d: 1,
+        s: { a: 0, k: [512, 512] },
+        p: { a: 0, k: [0, 0] },
+        r: { a: 0, k: state.cornerRadius * 5.12 },
+        nm: 'Background'
+      }, {
+        ty: 'fl',
+        c: { a: 0, k: hexToLottieColor(state.bgColor) },
+        o: { a: 0, k: 100 },
+        nm: 'BG Fill'
+      }],
+      ip: 0,
+      op: totalFrames,
+      st: 0
+    }]
+  };
+
+  // Add animation keyframes based on type
+  const layer = lottie.layers[0];
+  if (type === 'pulse' || type === 'breathe-scale') {
+    const maxScale = type === 'pulse' ? 100 + 8 * amp : 100 + 15 * amp;
+    layer.ks.s = {
+      a: 1,
+      k: [
+        { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: 0, s: [100, 100, 100] },
+        { i: { x: [0.4], y: [1] }, o: { x: [0.6], y: [0] }, t: totalFrames / 2, s: [maxScale, maxScale, 100] },
+        { t: totalFrames, s: [100, 100, 100] }
+      ]
+    };
+  } else if (type === 'rotate') {
+    layer.ks.r = {
+      a: 1,
+      k: [
+        { t: 0, s: [0] },
+        { t: totalFrames, s: [360] }
+      ]
+    };
+  } else if (type === 'bounce') {
+    const bounceY = 15 * amp;
+    layer.ks.p = {
+      a: 1,
+      k: [
+        { i: { x: 0.4, y: 1 }, o: { x: 0.6, y: 0 }, t: 0, s: [256, 256, 0] },
+        { i: { x: 0.4, y: 1 }, o: { x: 0.6, y: 0 }, t: totalFrames / 4, s: [256, 256 + bounceY, 0] },
+        { i: { x: 0.4, y: 1 }, o: { x: 0.6, y: 0 }, t: totalFrames / 2, s: [256, 256, 0] },
+        { i: { x: 0.4, y: 1 }, o: { x: 0.6, y: 0 }, t: totalFrames * 3/4, s: [256, 256 - bounceY, 0] },
+        { t: totalFrames, s: [256, 256, 0] }
+      ]
+    };
+  } else if (type === 'shake') {
+    const shakeX = 8 * amp;
+    layer.ks.p = {
+      a: 1,
+      k: [
+        { t: 0, s: [256, 256, 0] },
+        { t: totalFrames * 0.125, s: [256 + shakeX, 256, 0] },
+        { t: totalFrames * 0.375, s: [256 - shakeX, 256, 0] },
+        { t: totalFrames * 0.625, s: [256 + shakeX, 256, 0] },
+        { t: totalFrames * 0.875, s: [256 - shakeX, 256, 0] },
+        { t: totalFrames, s: [256, 256, 0] }
+      ]
+    };
+  } else if (type === 'orbit') {
+    const orbitR = 25 * amp;
+    const steps = 8;
+    const kf = [];
+    for (let i = 0; i <= steps; i++) {
+      const angle = (i / steps) * Math.PI * 2;
+      kf.push({
+        t: Math.round(totalFrames * i / steps),
+        s: [256 + Math.cos(angle) * orbitR, 256 + Math.sin(angle) * orbitR, 0]
+      });
+    }
+    layer.ks.p = { a: 1, k: kf };
+  } else if (type === 'rainbow-glow' || type === 'glow-breathe' || type === 'typewriter' || type === 'morph' || type === 'glitch') {
+    // These require content changes not easily expressed in Lottie shape layer
+    // Add a note in the name
+    layer.nm = `Icon (${type} - simplified)`;
+    if (type === 'glow-breathe') {
+      layer.ks.o = {
+        a: 1,
+        k: [
+          { t: 0, s: [100] },
+          { t: totalFrames / 2, s: [60] },
+          { t: totalFrames, s: [100] }
+        ]
+      };
+    }
+  }
+
+  const json = JSON.stringify(lottie, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'icon-animation.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Exported Lottie JSON');
+}
+
+function hexToLottieColor(hex) {
+  hex = hex.replace('#', '');
+  return [
+    parseInt(hex.substring(0, 2), 16) / 255,
+    parseInt(hex.substring(2, 4), 16) / 255,
+    parseInt(hex.substring(4, 6), 16) / 255,
+    1
+  ];
 }
 
 // === PLATFORM ICON PACKS (Feature 8) ===
@@ -2574,9 +3223,12 @@ function applyStateToUI(s) {
   $('borderColor').value = s.borderColor;
   $('borderWidth').value = s.borderWidth; $('borderWidthVal').textContent = s.borderWidth;
   $('glowIntensity').value = s.glowIntensity; $('glowVal').textContent = s.glowIntensity;
+  $('glowRadius').value = s.glowRadius != null ? s.glowRadius : 25; $('glowRadiusVal').textContent = s.glowRadius != null ? s.glowRadius : 25;
   $('symbolSize').value = s.symbolSize; $('sizeVal').textContent = s.symbolSize;
   $('cornerRadius').value = s.cornerRadius; $('radiusVal').textContent = s.cornerRadius;
+  $('xOffset').value = s.xOffset || 0; $('xOffsetVal').textContent = s.xOffset || 0;
   $('yOffset').value = s.yOffset; $('yOffsetVal').textContent = s.yOffset;
+  $('tilt').value = s.tilt || 0; $('tiltVal').textContent = (s.tilt || 0) + '°';
   $('symbolFont').value = s.symbolFont;
   $('symbolWeight').value = s.symbolWeight;
   $('transparentBg').checked = s.transparentBg;
@@ -2599,26 +3251,18 @@ function applyStateToUI(s) {
   $('patternOpacityVal').textContent = s.bgPatternOpacity != null ? s.bgPatternOpacity : 30;
   $('bgPatternColor').value = s.bgPatternColor || '#ffffff';
   updatePatternUI();
-  // Drop Shadow
-  $('dropShadowToggle').checked = !!s.dropShadow;
-  $('dropShadowColor').value = s.dropShadowColor || '#000000';
-  $('dropShadowBlur').value = s.dropShadowBlur != null ? s.dropShadowBlur : 15;
-  $('dropShadowBlurVal').textContent = s.dropShadowBlur != null ? s.dropShadowBlur : 15;
-  $('dropShadowX').value = s.dropShadowX != null ? s.dropShadowX : 5;
-  $('dropShadowXVal').textContent = s.dropShadowX != null ? s.dropShadowX : 5;
-  $('dropShadowY').value = s.dropShadowY != null ? s.dropShadowY : 5;
-  $('dropShadowYVal').textContent = s.dropShadowY != null ? s.dropShadowY : 5;
-  updateDropShadowUI();
-  // Inner Shadow
-  $('innerShadowToggle').checked = !!s.innerShadow;
-  $('innerShadowColor').value = s.innerShadowColor || '#000000';
-  $('innerShadowBlur').value = s.innerShadowBlur != null ? s.innerShadowBlur : 10;
-  $('innerShadowBlurVal').textContent = s.innerShadowBlur != null ? s.innerShadowBlur : 10;
-  updateInnerShadowUI();
   // Animation
   $('animationType').value = s.animationType || 'none';
   $('animationSpeed').value = s.animationSpeed != null ? s.animationSpeed : 50;
   $('animSpeedVal').textContent = s.animationSpeed != null ? s.animationSpeed : 50;
+  $('animAmplitude').value = s.animAmplitude != null ? s.animAmplitude : 50;
+  $('animAmplitudeVal').textContent = s.animAmplitude != null ? s.animAmplitude : 50;
+  $('animEasing').value = s.animEasing || 'linear';
+  $('animDirection').value = s.animDirection || 'normal';
+  $('animLoopCount').value = s.animLoopCount || 'infinite';
+  $('animDelay').value = s.animDelay != null ? s.animDelay : 0;
+  $('animDelayVal').textContent = s.animDelay != null ? s.animDelay : 0;
+  $('animMorphTarget').value = s.animMorphTarget || '★';
   updateAnimUI();
   // Google Font
   $('googleFontInput').value = s.googleFontName || '';
@@ -2652,20 +3296,6 @@ function updatePatternUI() {
   $('patternScaleRow').style.display = show ? 'flex' : 'none';
   $('patternOpacityRow').style.display = show ? 'flex' : 'none';
   $('patternColorRow').style.display = show ? 'flex' : 'none';
-}
-
-function updateDropShadowUI() {
-  const show = !!state.dropShadow;
-  $('dropShadowColorRow').style.display = show ? 'flex' : 'none';
-  $('dropShadowBlurRow').style.display = show ? 'flex' : 'none';
-  $('dropShadowXRow').style.display = show ? 'flex' : 'none';
-  $('dropShadowYRow').style.display = show ? 'flex' : 'none';
-}
-
-function updateInnerShadowUI() {
-  const show = !!state.innerShadow;
-  $('innerShadowColorRow').style.display = show ? 'flex' : 'none';
-  $('innerShadowBlurRow').style.display = show ? 'flex' : 'none';
 }
 
 // === COLOR HARMONY ===
@@ -2746,7 +3376,21 @@ function updateAnimUI() {
   const type = state.animationType || 'none';
   const showControls = type !== 'none';
   $('animSpeedRow').style.display = showControls ? 'flex' : 'none';
+  $('animAmplitudeRow').style.display = showControls ? 'flex' : 'none';
+  $('animEasingRow').style.display = showControls ? 'flex' : 'none';
+  $('animDirectionRow').style.display = showControls ? 'flex' : 'none';
+  $('animLoopCountRow').style.display = showControls ? 'flex' : 'none';
+  $('animDelayRow').style.display = showControls ? 'flex' : 'none';
+  $('animMorphTargetRow').style.display = type === 'morph' ? 'flex' : 'none';
+  $('animTimelineRow').style.display = showControls ? 'flex' : 'none';
   $('animToggleRow').style.display = showControls ? 'flex' : 'none';
+}
+
+function updatePlayPauseBtn() {
+  const btn = $('animPlayPauseBtn');
+  if (btn) {
+    btn.innerHTML = animationRunning ? '&#9208;' : '&#9654;';
+  }
 }
 
 // === LAYER UI ===
@@ -2832,6 +3476,23 @@ function buildLayerUI() {
         <input type="range" id="layerGlow" min="0" max="100" step="1" value="${layer.glow || 0}">
         <span class="row-value" id="layerGlowVal">${layer.glow || 0}</span>
       </div>
+      <div class="row">
+        <label>Animation</label>
+        <select id="layerAnimType">
+          <option value="none"${(layer.animationType || 'none') === 'none' ? ' selected' : ''}>None</option>
+          <option value="pulse"${layer.animationType === 'pulse' ? ' selected' : ''}>Pulse</option>
+          <option value="bounce"${layer.animationType === 'bounce' ? ' selected' : ''}>Bounce</option>
+          <option value="shake"${layer.animationType === 'shake' ? ' selected' : ''}>Shake</option>
+          <option value="rotate"${layer.animationType === 'rotate' ? ' selected' : ''}>Rotate</option>
+          <option value="orbit"${layer.animationType === 'orbit' ? ' selected' : ''}>Orbit</option>
+          <option value="breathe-scale"${layer.animationType === 'breathe-scale' ? ' selected' : ''}>Breathe Scale</option>
+        </select>
+      </div>
+      <div class="row" id="layerAnimSpeedRow" style="display:${layer.animationType && layer.animationType !== 'none' ? 'flex' : 'none'};">
+        <label>Anim Speed</label>
+        <input type="range" id="layerAnimSpeed" min="0" max="100" step="1" value="${layer.animSpeed || 50}">
+        <span class="row-value" id="layerAnimSpeedVal">${layer.animSpeed || 50}</span>
+      </div>
     `;
     ctrlsWrap.innerHTML = html;
 
@@ -2852,6 +3513,15 @@ function buildLayerUI() {
         $(valId).textContent = e.target.value;
         updatePreview();
       });
+    });
+    $('layerAnimType').addEventListener('change', e => {
+      state.layers[idx].animationType = e.target.value;
+      $('layerAnimSpeedRow').style.display = e.target.value !== 'none' ? 'flex' : 'none';
+      updatePreview();
+    });
+    $('layerAnimSpeed').addEventListener('input', e => {
+      state.layers[idx].animSpeed = +e.target.value;
+      $('layerAnimSpeedVal').textContent = e.target.value;
     });
     $('removeLayerBtn').addEventListener('click', () => {
       state.layers.splice(idx, 1);
@@ -3412,42 +4082,6 @@ function bindControls() {
     updatePreview();
   });
 
-  // Drop Shadow
-  $('dropShadowToggle').addEventListener('change', e => {
-    state.dropShadow = e.target.checked;
-    updateDropShadowUI();
-    updatePreview();
-  });
-  $('dropShadowColor').addEventListener('input', e => { state.dropShadowColor = e.target.value; updatePreview(); });
-  $('dropShadowBlur').addEventListener('input', e => {
-    state.dropShadowBlur = +e.target.value;
-    $('dropShadowBlurVal').textContent = e.target.value;
-    updatePreview();
-  });
-  $('dropShadowX').addEventListener('input', e => {
-    state.dropShadowX = +e.target.value;
-    $('dropShadowXVal').textContent = e.target.value;
-    updatePreview();
-  });
-  $('dropShadowY').addEventListener('input', e => {
-    state.dropShadowY = +e.target.value;
-    $('dropShadowYVal').textContent = e.target.value;
-    updatePreview();
-  });
-
-  // Inner Shadow
-  $('innerShadowToggle').addEventListener('change', e => {
-    state.innerShadow = e.target.checked;
-    updateInnerShadowUI();
-    updatePreview();
-  });
-  $('innerShadowColor').addEventListener('input', e => { state.innerShadowColor = e.target.value; updatePreview(); });
-  $('innerShadowBlur').addEventListener('input', e => {
-    state.innerShadowBlur = +e.target.value;
-    $('innerShadowBlurVal').textContent = e.target.value;
-    updatePreview();
-  });
-
   // Color Harmony
   $('harmonyBar').querySelectorAll('.harmony-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -3475,8 +4109,10 @@ function bindControls() {
   const sliders = [
     ['borderWidth', 'borderWidthVal', 'borderWidth'],
     ['glowIntensity', 'glowVal', 'glowIntensity'],
+    ['glowRadius', 'glowRadiusVal', 'glowRadius'],
     ['symbolSize', 'sizeVal', 'symbolSize'],
     ['cornerRadius', 'radiusVal', 'cornerRadius'],
+    ['xOffset', 'xOffsetVal', 'xOffset'],
     ['yOffset', 'yOffsetVal', 'yOffset'],
   ];
   sliders.forEach(([inputId, valId, key]) => {
@@ -3485,6 +4121,31 @@ function bindControls() {
       $(valId).textContent = e.target.value;
       updatePreview();
     });
+  });
+
+  // Tilt slider
+  $('tilt').addEventListener('input', e => {
+    state.tilt = +e.target.value;
+    $('tiltVal').textContent = e.target.value + '°';
+    updatePreview();
+  });
+
+  // Snap buttons
+  $('snapCenter').addEventListener('click', () => {
+    state.xOffset = 0; state.yOffset = 0;
+    $('xOffset').value = 0; $('xOffsetVal').textContent = 0;
+    $('yOffset').value = 0; $('yOffsetVal').textContent = 0;
+    updatePreview();
+  });
+  $('snapHCenter').addEventListener('click', () => {
+    state.xOffset = 0;
+    $('xOffset').value = 0; $('xOffsetVal').textContent = 0;
+    updatePreview();
+  });
+  $('snapVCenter').addEventListener('click', () => {
+    state.yOffset = 0;
+    $('yOffset').value = 0; $('yOffsetVal').textContent = 0;
+    updatePreview();
   });
 
   // Font / Weight (symbolFont handler moved to new feature section below for Google Font support)
@@ -3496,20 +4157,55 @@ function bindControls() {
     updateAnimUI();
     if (state.animationType === 'none') {
       stopAnimation();
-      $('animToggle').checked = false;
+      updatePlayPauseBtn();
     }
   });
   $('animationSpeed').addEventListener('input', e => {
     state.animationSpeed = +e.target.value;
     $('animSpeedVal').textContent = e.target.value;
   });
-  $('animToggle').addEventListener('change', e => {
-    if (e.target.checked) {
-      startAnimation();
-    } else {
+  $('animAmplitude').addEventListener('input', e => {
+    state.animAmplitude = +e.target.value;
+    $('animAmplitudeVal').textContent = e.target.value;
+  });
+  $('animEasing').addEventListener('change', e => {
+    state.animEasing = e.target.value;
+  });
+  $('animDirection').addEventListener('change', e => {
+    state.animDirection = e.target.value;
+  });
+  $('animLoopCount').addEventListener('change', e => {
+    state.animLoopCount = e.target.value;
+  });
+  $('animDelay').addEventListener('input', e => {
+    state.animDelay = +e.target.value;
+    $('animDelayVal').textContent = e.target.value;
+  });
+  $('animMorphTarget').addEventListener('input', e => {
+    state.animMorphTarget = e.target.value || '★';
+  });
+  $('animTimeline').addEventListener('input', e => {
+    const val = +e.target.value;
+    $('animTimelineVal').textContent = val + '%';
+    if (animationRunning) {
       stopAnimation();
-      updatePreview(); // reset to static
+      updatePlayPauseBtn();
     }
+    animationScrubbing = true;
+    const progress = val / 100;
+    renderAnimationFrame(progress, 'preview');
+  });
+  $('animTimeline').addEventListener('change', () => {
+    animationScrubbing = false;
+  });
+  $('animPlayPauseBtn').addEventListener('click', () => {
+    if (animationRunning) {
+      stopAnimation();
+    } else {
+      animationScrubbing = false;
+      startAnimation();
+    }
+    updatePlayPauseBtn();
   });
 
   // Export PNG
@@ -3633,6 +4329,12 @@ function bindControls() {
 
   // Export GIF (Feature 7)
   $('exportGifBtn').addEventListener('click', exportGIF);
+  // Export APNG
+  $('exportApngBtn').addEventListener('click', exportAPNG);
+  // Export CSS Animation
+  $('exportCssAnimBtn').addEventListener('click', generateCSSAnimation);
+  // Export Lottie
+  $('exportLottieBtn').addEventListener('click', exportLottie);
 
   // Platform Pack (Feature 8)
   $('platformPackBtn').addEventListener('click', openPlatformDialog);
@@ -3692,8 +4394,6 @@ buildLayerUI();
 bindControls();
 updateGradientUI();
 updatePatternUI();
-updateDropShadowUI();
-updateInnerShadowUI();
 updateAnimUI();
 updateGoogleFontUI();
 updateContrastBadge();
