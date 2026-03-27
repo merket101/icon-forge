@@ -866,6 +866,54 @@ function roundedRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
+// Measure the vertical correction needed to truly center a glyph.
+// Canvas textBaseline 'middle' uses font metrics which often don't match
+// the visual center of Unicode symbols. This renders to a temp canvas,
+// scans the pixel bounds, and returns the Y offset needed.
+const _glyphCache = new Map();
+function measureGlyphYCorrection(symbol, fontSize, fontSpec) {
+  const key = `${symbol}|${fontSpec}`;
+  if (_glyphCache.has(key)) return _glyphCache.get(key);
+
+  const sz = Math.max(64, Math.ceil(fontSize * 2.5));
+  const tc = document.createElement('canvas');
+  tc.width = sz; tc.height = sz;
+  const tctx = tc.getContext('2d');
+
+  tctx.fillStyle = '#000';
+  tctx.fillRect(0, 0, sz, sz);
+  tctx.font = fontSpec;
+  tctx.textAlign = 'center';
+  tctx.textBaseline = 'middle';
+  tctx.fillStyle = '#fff';
+  tctx.fillText(symbol, sz / 2, sz / 2);
+
+  const imgData = tctx.getImageData(0, 0, sz, sz);
+  const d = imgData.data;
+  let minY = sz, maxY = 0;
+  let found = false;
+  for (let y = 0; y < sz; y++) {
+    for (let x = 0; x < sz; x++) {
+      const i = (y * sz + x) * 4;
+      if (d[i] > 10 || d[i + 1] > 10 || d[i + 2] > 10) {
+        found = true;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  let correction = 0;
+  if (found) {
+    const glyphCenterY = (minY + maxY) / 2;
+    correction = sz / 2 - glyphCenterY;
+  }
+
+  if (_glyphCache.size > 200) _glyphCache.clear();
+  _glyphCache.set(key, correction);
+  return correction;
+}
+
 function renderIcon(ctx, size, s) {
   const r = (s.cornerRadius / 100) * size;
   const bw = s.borderEnabled ? (s.borderWidth / 100) * size : 0;
@@ -899,9 +947,15 @@ function renderIcon(ctx, size, s) {
   }
 
   const cx = size / 2;
-  const cy = size / 2 + (s.yOffset / 100) * size;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
+
+  // Measure actual pixel bounding box to correct vertical centering
+  // Canvas textBaseline 'middle' uses font metrics, not rendered pixels,
+  // so glyphs often appear shifted upward. We fix this by measuring the
+  // real rendered bounds and applying a correction.
+  const yCorrection = measureGlyphYCorrection(s.symbol, fontSize, `${weight} ${fontSize}px ${fontFam}`);
+  const cy = size / 2 + (s.yOffset / 100) * size + yCorrection;
 
   // Glow layers
   if (s.glowIntensity > 0) {
